@@ -14,7 +14,7 @@ public interface UserRepository extends CrudRepository<User, String> {
 	Optional<User> findByUserName(String name);
 
 	List<User> findUserByUserName(String userName);
-	
+
 	default List<Alumni> findByFilters(
 			@Nullable Integer minAge,
 			@Nullable Integer maxAge,
