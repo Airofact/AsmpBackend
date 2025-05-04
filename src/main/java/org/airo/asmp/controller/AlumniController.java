@@ -1,91 +1,98 @@
 package org.airo.asmp.controller;
 
-import org.airo.asmp.model.Gender;
-import org.airo.asmp.model.user.Alumni;
+import jakarta.persistence.criteria.Predicate;
+import lombok.RequiredArgsConstructor;
+import org.airo.asmp.dto.entity.AlumniCreateDto;
+import org.airo.asmp.dto.entity.AlumniFilterDto;
+import org.airo.asmp.dto.entity.AlumniUpdateDto;
+import org.airo.asmp.mapper.entity.AlumniMapper;
+import org.airo.asmp.model.entity.Alumni;
 
-import org.airo.asmp.model.user.User;
-import org.airo.asmp.repository.user.UserRepository;
-import org.springframework.http.HttpStatus;
+import org.airo.asmp.repository.entity.AlumniRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/alumni")
+@RequiredArgsConstructor
 public class AlumniController {
-
-    private final UserRepository userRepository;
-
-    public AlumniController(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private final AlumniRepository alumniRepository;
+    private final AlumniMapper alumniMapper;
 
     //校友注册
-    @PostMapping("/register")
-    public ResponseEntity<String> registerAlumni(@Valid @RequestBody Alumni alumni) {
-        userRepository.save(alumni);
-        return ResponseEntity.ok("校友注册成功！");
+    @PostMapping("/add")
+    public void add(@Valid @RequestBody AlumniCreateDto alumniCreateDto) {
+        alumniRepository.save(alumniMapper.toEntity(alumniCreateDto));
     }
-    
+
     // 校友信息修改
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updateAlumni(@PathVariable String id, @Valid @RequestBody Alumni updatedAlumni) {
-        Optional<User> existingUser = userRepository.findByUserName(updatedAlumni.getUserName());
-        if (existingUser.isPresent()) {
-            Alumni alumni = (Alumni) existingUser.get();
-            alumni.setRealName(updatedAlumni.getRealName());
-            alumni.setGender(updatedAlumni.getGender());
-            alumni.setDateOfBirth(updatedAlumni.getDateOfBirth());
-            alumni.setAddress(updatedAlumni.getAddress());
-            alumni.setCompanyName(updatedAlumni.getCompanyName());
-            alumni.setCurrentJob(updatedAlumni.getCurrentJob());
-    
-            userRepository.save(alumni);
-            return ResponseEntity.ok("校友信息更新成功！");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("未找到指定校友！");
+    @PutMapping("/update/{id}")
+    public ResponseEntity<String> update(@PathVariable UUID id, @Valid @RequestBody AlumniUpdateDto alumniUpdateDto) {
+        var alumni = alumniRepository.findById(id);
+        if (alumni.isEmpty()) {
+            return ResponseEntity.badRequest().body("校友信息不存在！");
         }
+
+        Alumni existingAlumni = alumni.get();
+        alumniMapper.partialUpdate(alumniUpdateDto, existingAlumni);
+        alumniRepository.save(existingAlumni);
+        return ResponseEntity.ok("校友信息修改成功！");
     }
 
     //根据用户名查询校友
     @GetMapping("/search")
-    public ResponseEntity<?> searchAlumni(@RequestParam String userName) {
-        List<User> users = userRepository.findUserByUserName(userName);
-        if (users.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("未找到指定校友！");
-        }
-        return ResponseEntity.ok(users);
-    }
-        
-    // 校友分组查询
-    @GetMapping("/group")
-    public ResponseEntity<?> groupAlumni(
-            @RequestParam(required = false) Integer minAge,
-            @RequestParam(required = false) Integer maxAge,
-            @RequestParam(required = false) Gender gender,
-            @RequestParam(required = false) String companyName,
-            @RequestParam(required = false) Alumni.Status status) {
-        List<Alumni> alumniList = userRepository.findByFilters(minAge, maxAge, gender, companyName, status);
-        if (alumniList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("未找到符合条件的校友！");
-        }
-        return ResponseEntity.ok(alumniList);
+    public List<Alumni> search(@RequestParam String realName) {
+        return alumniRepository.findByRealName(realName);
     }
 
-        // 校友审核
-        @PutMapping("/{id}/approve")
-        public ResponseEntity<String> approveAlumni(@PathVariable String id) {
-            Optional<User> existingUser = userRepository.findById(id);
-            if (existingUser.isPresent() && existingUser.get() instanceof Alumni) {
-                Alumni alumni = (Alumni) existingUser.get();
-                alumni.setStatus(Alumni.Status.APPROVED);
-                userRepository.save(alumni);
-                return ResponseEntity.ok("校友审核通过！");
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("未找到指定校友或该用户不是校友！");
+    // 校友分组查询
+    @GetMapping("/filter")
+    public List<Alumni> filter(
+            @RequestBody AlumniFilterDto alumniFilterDto
+    ) {
+        return alumniRepository.findAll((root, query, builder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if(alumniFilterDto.id() != null){
+                predicates.add(builder.equal(root.get("id"), alumniFilterDto.id()));
             }
-        }
+            if(alumniFilterDto.addedAtBegin() != null){
+                predicates.add(builder.greaterThanOrEqualTo(root.get("addedAt"), alumniFilterDto.addedAtBegin()));
+            }
+            if(alumniFilterDto.addedAtEnd() != null){
+                predicates.add(builder.lessThan(root.get("addedAt"), alumniFilterDto.addedAtEnd()));
+            }
+            if(alumniFilterDto.studentId() != null){
+                predicates.add(builder.equal(root.get("studentId"), alumniFilterDto.studentId()));
+            }
+            if(alumniFilterDto.realName() != null){
+                predicates.add(builder.equal(root.get("realName"), alumniFilterDto.realName()));
+            }
+            if(alumniFilterDto.gender() != null){
+                predicates.add(builder.equal(root.get("gender"), alumniFilterDto.gender()));
+            }
+            if(alumniFilterDto.dateOfBirthBegin() != null){
+                predicates.add(builder.greaterThanOrEqualTo(root.get("dateOfBirth"), alumniFilterDto.dateOfBirthBegin()));
+            }
+            if(alumniFilterDto.dateOfBirthEnd() != null){
+                predicates.add(builder.lessThan(root.get("dateOfBirth"), alumniFilterDto.dateOfBirthEnd()));
+            }
+            if(alumniFilterDto.address() != null){
+                predicates.add(builder.equal(root.get("address"), alumniFilterDto.address()));
+            }
+            if(alumniFilterDto.companyName() != null){
+                predicates.add(builder.equal(root.get("companyName"), alumniFilterDto.companyName()));
+            }
+            if(alumniFilterDto.currentJob() != null){
+                predicates.add(builder.equal(root.get("currentJob"), alumniFilterDto.currentJob()));
+            }
+            return builder.and(predicates.toArray(new Predicate[0]));
+		});
+    }
 }
 
