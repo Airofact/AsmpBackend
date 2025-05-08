@@ -9,6 +9,7 @@ import org.airo.asmp.mapper.entity.AlumniMapper;
 import org.airo.asmp.model.entity.Alumni;
 
 import org.airo.asmp.repository.entity.AlumniRepository;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -53,7 +54,8 @@ public class AlumniController {
     // 校友分组查询
     @GetMapping("/filter")
     public List<Alumni> filter(
-            @RequestBody AlumniFilterDto alumniFilterDto
+            @ParameterObject
+            AlumniFilterDto alumniFilterDto
     ) {
         return alumniRepository.findAll((root, query, builder) -> {
             List<Predicate> predicates = new ArrayList<>();

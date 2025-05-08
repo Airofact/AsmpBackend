@@ -18,7 +18,7 @@ import org.hibernate.annotations.Immutable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Alumni extends BusinessEntity {
-	@Immutable @NotNull
+	@Column(nullable = false, updatable = false, unique = true)
 	private String studentId;
 	@NotNull
 	private String realName;

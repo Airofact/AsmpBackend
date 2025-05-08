@@ -40,7 +40,7 @@ public class EnterpriseController {
 
 			// ID 精确匹配
 			if (filterDto.id() != null) {
-				predicates.add((Predicate) builder.equal(root.get("id"), filterDto.id()));
+				predicates.add(builder.equal(root.get("id"), filterDto.id()));
 			}
 
 			// 添加人ID 关联查询
