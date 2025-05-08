@@ -109,7 +109,6 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>org.airo.asmp.AlumniServiceManagementPlatformApplication</mainClass>
-                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>

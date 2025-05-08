@@ -1,0 +1,39 @@
+services:
+  # 自定义MySQL服务（使用airo271/mysql镜像）
+  custom-mysql:
+    image: mysql
+    container_name: custom-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Airo&mysql
+      MYSQL_DATABASE: alumni_db
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_pass
+    ports:
+      - "3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  # 应用服务（暴露8080端口）
+  webapp:
+    image: airo271/asmp  # 假设这是您的应用镜像
+    container_name: webapp
+    ports:
+      - "8080:8080"  # 暴露8080给宿主机
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://custom-mysql:3306/alumni_db?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Airo&mysql
+    depends_on:
+      - custom-mysql
+    networks:
+      - app-network
+
+# 网络和卷配置
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
