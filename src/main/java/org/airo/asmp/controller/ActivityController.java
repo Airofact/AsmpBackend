@@ -1,8 +1,7 @@
 package org.airo.asmp.controller;
 
-import jakarta.validation.Valid;
 import org.airo.asmp.model.activity.Activity;
-import org.airo.asmp.repository.activity.ActivityRepository;
+import org.airo.asmp.repository.ActivityRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

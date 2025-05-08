@@ -1,4 +1,4 @@
-package org.airo.asmp.model.Activity_application;
+package org.airo.asmp.model.activityapplication;
 
 public enum Status {
     pending,

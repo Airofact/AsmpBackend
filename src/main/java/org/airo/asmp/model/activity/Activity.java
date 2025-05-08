@@ -76,6 +76,7 @@ this.description = description;
    this.end_time = end_time;
   }
 
+  public Long getId() {return id;}
   public LocalDateTime getStart_time() {
     return start_time;
   }
