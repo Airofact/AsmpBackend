@@ -31,7 +31,7 @@ public class ActivityController {
 
     // 删除活动
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteActivity(@PathVariable("id") Long id) {
+    public ResponseEntity<String> deleteActivity(@PathVariable("id") String id) {
 
         if (activityRepository.existsById(id)) {
             Optional<Activity> optionalactivity = activityRepository.findById(id);
@@ -50,7 +50,7 @@ public class ActivityController {
 
     //修改活动
     @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateActivity(@PathVariable("id") Long id, @RequestBody Activity newData) {
+    public ResponseEntity<String> updateActivity(@PathVariable("id") String id, @RequestBody Activity newData) {
         if (activityRepository.existsById(id)&&newData.getStart_time().isBefore(newData.getEnd_time())) {
             Optional<Activity> optionalactivity = activityRepository.findById(id);
             Activity updateactivity= optionalactivity.get();
@@ -75,7 +75,7 @@ public class ActivityController {
     }
 //查询活动
     @GetMapping("/search/{id}")
-    public ResponseEntity<Activity> searchActivity(@PathVariable("id") Long id) {
+    public ResponseEntity<Activity> searchActivity(@PathVariable("id") String id) {
         if (activityRepository.existsById(id)) {
             Optional<Activity> optionalactivity = activityRepository.findById(id);
             return ResponseEntity.ok(optionalactivity.get());

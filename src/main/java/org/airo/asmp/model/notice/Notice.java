@@ -11,7 +11,8 @@ import java.util.UUID;
 @Getter
 public class Notice {
     @Id
-    UUID id=UUID.randomUUID();
+    @Column(columnDefinition = "char(36)")
+    String id=UUID.randomUUID().toString();
 
     @Column(columnDefinition = "varchar(100)")
     String title;

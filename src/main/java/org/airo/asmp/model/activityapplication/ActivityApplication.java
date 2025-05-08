@@ -5,12 +5,13 @@ import org.airo.asmp.model.activity.Activity;
 import org.airo.asmp.model.entity.Alumni;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 public class ActivityApplication{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
+    @Column(columnDefinition = "char(36)")
+    String id= UUID.randomUUID().toString();
 
 
     @OneToOne

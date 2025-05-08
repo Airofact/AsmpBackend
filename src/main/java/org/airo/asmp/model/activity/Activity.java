@@ -3,12 +3,13 @@ package org.airo.asmp.model.activity;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 public class Activity {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
+  @Column(columnDefinition = "char(36)")
+    String id= UUID.randomUUID().toString();
 
   @Column(columnDefinition = "varchar(100)")
   String title;
@@ -76,7 +77,7 @@ this.description = description;
    this.end_time = end_time;
   }
 
-  public Long getId() {return id;}
+  public String getId() {return id;}
   public LocalDateTime getStart_time() {
     return start_time;
   }

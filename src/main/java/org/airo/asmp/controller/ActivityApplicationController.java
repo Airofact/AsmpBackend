@@ -29,7 +29,7 @@ public class ActivityApplicationController {
     //增加申请
     @PostMapping("/add")
     public ResponseEntity<String> addApplication(@RequestBody ActivityApplication application) {
-        Long activityId = application.getActivity().getId();
+        String activityId = application.getActivity().getId();
         UUID alumniId = application.getAlumni().getId();
         if (!activityRepository.existsById(activityId)) {return ResponseEntity.ok("不存在该活动");}
         else if (!alumniRepository.existsById(alumniId)){return ResponseEntity.ok("不存在该学生");}
@@ -40,7 +40,7 @@ public class ActivityApplicationController {
     }
     //删除申请
         @DeleteMapping("/delete/{id}")
-        public ResponseEntity<String> deleteApplication(@PathVariable("id") Long id)
+        public ResponseEntity<String> deleteApplication(@PathVariable("id") String id)
         {
         if (activityApplicationRepository.existsById(id)) {
             activityApplicationRepository.deleteById(id);
@@ -53,7 +53,7 @@ public class ActivityApplicationController {
         /*暂且不知道需不需要
         //修改申请
         @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateActivity(@PathVariable("id") Long id, @RequestBody ActivityApplication newData) {
+    public ResponseEntity<String> updateActivity(@PathVariable("id") String id, @RequestBody ActivityApplication newData) {
         if (activityApplicationRespository.existsById(id)) {
             Optional<ActivityApplication> optionalActivityApplication = activityApplicationRespository.findById(id);
             ActivityApplication application = optionalActivityApplication.get();
@@ -67,7 +67,7 @@ public class ActivityApplicationController {
         }*/
         //查询申请
         @GetMapping("/search/{id}")
-    public ResponseEntity<ActivityApplication> searchActivity(@PathVariable("id") Long id) {
+    public ResponseEntity<ActivityApplication> searchActivity(@PathVariable("id") String id) {
         if (activityApplicationRepository.existsById(id)) {
             Optional<ActivityApplication> optionalActivityApplication = activityApplicationRepository.findById(id);
             return ResponseEntity.ok(optionalActivityApplication.get());

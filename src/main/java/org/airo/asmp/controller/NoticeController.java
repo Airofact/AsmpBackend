@@ -28,7 +28,7 @@ public class NoticeController {
 
     //修改通知
     @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateActivity(@RequestBody Notice newData, @PathVariable("id") UUID id) {
+    public ResponseEntity<String> updateActivity(@RequestBody Notice newData, @PathVariable("id") String id) {
         if (noticeRepository.existsById(id)) {
             Optional<Notice> optionalNotice = noticeRepository.findById(id);
             Notice updateNotice=optionalNotice.get();
@@ -45,7 +45,7 @@ public class NoticeController {
 
     //查询活动
     @GetMapping("search/{id}")
-    public ResponseEntity<Notice> searchActivity(@PathVariable("id") UUID id) {
+    public ResponseEntity<Notice> searchActivity(@PathVariable("id") String id) {
         if (noticeRepository.existsById(id)) {
             Optional<Notice> optionalNotice = noticeRepository.findById(id);
             return ResponseEntity.ok(optionalNotice.get());
@@ -57,7 +57,7 @@ public class NoticeController {
 
     //删除活动
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<String> deleteActivity(@PathVariable("id") UUID id) {
+    public ResponseEntity<String> deleteActivity(@PathVariable("id") String id) {
         if (noticeRepository.existsById(id)) {
             noticeRepository.deleteById(id);
             return ResponseEntity.ok("删除成功");
