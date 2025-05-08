@@ -18,7 +18,7 @@ public abstract class BusinessEntity {
 	@Id
 	@UuidGenerator
 	@Immutable
-	protected UUID id;
+	protected UUID id=UUID.randomUUID();
 
 	@ManyToOne
 	@NotNull
