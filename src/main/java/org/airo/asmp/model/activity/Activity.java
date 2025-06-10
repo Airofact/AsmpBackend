@@ -1,15 +1,21 @@
 package org.airo.asmp.model.activity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.airo.asmp.model.entity.Organization;
+import org.hibernate.annotations.UuidGenerator;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-
+@Getter
+@Setter
 @Entity
 public class Activity {
-  @Id
-  @Column(columnDefinition = "char(36)")
-    String id= UUID.randomUUID().toString();
+    @Id
+    @UuidGenerator
+    UUID id;
 
   @Column(columnDefinition = "varchar(100)")
   String title;
@@ -18,90 +24,22 @@ public class Activity {
   String description;
 
   @Column()
-  LocalDateTime start_time;
+  LocalDateTime startTime;
 
   @Column()
-  LocalDateTime end_time;
+  LocalDateTime endTime;
 
   @Column(columnDefinition = "varchar(200)")
   String location;
 
   @Column(columnDefinition = "int")
-  int max_participants;
+  int maxParticipants;
 
-  @Column(columnDefinition = "bigint")
-  long org_id;
-
-  @Column(columnDefinition = "bigint")
-  long creator_id;
+  @ManyToOne
+  @JoinColumn(name="organizerId")
+    Organization organizer;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   Status status=Status.not_started;
-
- public Activity(String title,String description,LocalDateTime end_time,LocalDateTime start_time,
-                 String location,int max_participants,long org_id,
-                 long creator_id) {
-this.start_time = start_time;
-this.end_time = end_time;
-this.location = location;
-this.max_participants = max_participants;
-this.org_id = org_id;
-this.creator_id = creator_id;
-this.title = title;
-this.description = description;
- }
-
-  public void setStart_time(LocalDateTime start_time) {
-   this.start_time = start_time;
-  }
-  public void setTitle(String title) {
-    this.title = title;
-  }
-  public void setDescription(String description) {
-   this.description = description;
-  }
-  public void setLocation(String location) {
-   this.location = location;
-  }
-  public void setMax_participants(int max_participants) {
-   this.max_participants = max_participants;
-  }
-  public void setOrg_id(long org_id) {
-   this.org_id = org_id;
-  }
-  public void setCreator_id(long creator_id) {
-   this.creator_id = creator_id;
-  }
-  public void setEnd_time(LocalDateTime end_time) {
-   this.end_time = end_time;
-  }
-
-  public String getId() {return id;}
-  public LocalDateTime getStart_time() {
-    return start_time;
-  }
-  public String getTitle() {
-   return title;
-  }
-  public String getDescription() {
-   return description;
-  }
-  public String getLocation() {
-   return location;
-  }
-  public int getMax_participants() {
-   return max_participants;
-  }
-  public long getOrg_id() {
-   return org_id;
-  }
-  public long getCreator_id() {
-   return creator_id;
-  }
-  public LocalDateTime getEnd_time() {
-   return end_time;
-  }
-
-  public Activity() {}
 }

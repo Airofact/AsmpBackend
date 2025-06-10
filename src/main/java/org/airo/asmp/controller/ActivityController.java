@@ -1,26 +1,40 @@
 package org.airo.asmp.controller;
 
+import lombok.RequiredArgsConstructor;
+import org.airo.asmp.dto.entity.ActivityCreateDto;
+import org.airo.asmp.dto.entity.ActivityUpdateDto;
 import org.airo.asmp.model.activity.Activity;
+import org.airo.asmp.model.entity.Organization;
 import org.airo.asmp.repository.ActivityRepository;
+import org.airo.asmp.repository.entity.AlumniRepository;
+import org.airo.asmp.repository.entity.OrganizationRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/activity")
 public class ActivityController {
     private final ActivityRepository activityRepository;
-
-    public ActivityController(ActivityRepository activityRepository) {
-        this.activityRepository = activityRepository;
-    }
-
+    private final OrganizationRepository organizationRepository;
     //增加活动
     @PostMapping("/add")
-    public ResponseEntity<String> addActivity(@RequestBody  Activity activity) {
-        if(activity.getStart_time().isBefore(activity.getEnd_time())) {
+    public ResponseEntity<String> addActivity(@RequestBody ActivityCreateDto dto) {
+        Organization organization = organizationRepository.findById(dto.organizer()).orElseThrow(() -> new RuntimeException("Organization not found"));
+        if(dto.startTime().isBefore(dto.endTime())) {
+            Activity activity = new Activity();
+            activity.setStartTime(dto.startTime());
+            activity.setEndTime(dto.endTime());
+            activity.setLocation(dto.location());
+            activity.setDescription(dto.description());
+            activity.setTitle(dto.title());
+            activity.setStatus(dto.status());
+            activity.setMaxParticipants(dto.maxParticipants());
+            activity.setOrganizer(organization);
             activityRepository.save(activity);
             return ResponseEntity.ok("活动添加成功");
         }
@@ -31,12 +45,12 @@ public class ActivityController {
 
     // 删除活动
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteActivity(@PathVariable("id") String id) {
+    public ResponseEntity<String> deleteActivity(@PathVariable("id") UUID id) {
 
         if (activityRepository.existsById(id)) {
             Optional<Activity> optionalactivity = activityRepository.findById(id);
             Activity activity= optionalactivity.get();
-            if (LocalDateTime.now().isBefore(activity.getStart_time())) {
+            if (LocalDateTime.now().isBefore(activity.getStartTime())) {
                 activityRepository.delete(activity);
                 return ResponseEntity.ok("活动删除成功");
             } else {
@@ -50,23 +64,22 @@ public class ActivityController {
 
     //修改活动
     @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateActivity(@PathVariable("id") String id, @RequestBody Activity newData) {
-        if (activityRepository.existsById(id)&&newData.getStart_time().isBefore(newData.getEnd_time())) {
+    public ResponseEntity<String> updateActivity(@PathVariable("id") UUID id, @RequestBody ActivityUpdateDto newData) {
+        if (activityRepository.existsById(id)&&newData.startTime().isBefore(newData.endTime())) {
             Optional<Activity> optionalactivity = activityRepository.findById(id);
             Activity updateactivity= optionalactivity.get();
-
-            updateactivity.setStart_time(newData.getStart_time());
-            updateactivity.setCreator_id(newData.getCreator_id());
-            updateactivity.setTitle(newData.getTitle());
-            updateactivity.setDescription(newData.getDescription());
-            updateactivity.setEnd_time(newData.getEnd_time());
-            updateactivity.setOrg_id(newData.getOrg_id());
-            updateactivity.setLocation(newData.getLocation());
-            updateactivity.setMax_participants(newData.getMax_participants());
+            updateactivity.setStartTime(newData.startTime());
+            updateactivity.setTitle(newData.title());
+            updateactivity.setDescription(newData.description());
+            updateactivity.setEndTime(newData.endTime());
+            updateactivity.setLocation(newData.location());
+            updateactivity.setMaxParticipants(newData.maxParticipants());
+            updateactivity.setStatus(newData.status());
+            updateactivity.setOrganizer(updateactivity.getOrganizer());
             activityRepository.save(updateactivity);
             return ResponseEntity.ok("修改成功");
         }
-        else if (newData.getStart_time().isAfter(newData.getEnd_time()) ){
+        else if (newData.startTime().isAfter(newData.endTime()) ){
             return ResponseEntity.ok("修改失败，请检查日期");
         }
         else {
@@ -75,7 +88,7 @@ public class ActivityController {
     }
 //查询活动
     @GetMapping("/search/{id}")
-    public ResponseEntity<Activity> searchActivity(@PathVariable("id") String id) {
+    public ResponseEntity<Activity> searchActivity(@PathVariable("id") UUID id) {
         if (activityRepository.existsById(id)) {
             Optional<Activity> optionalactivity = activityRepository.findById(id);
             return ResponseEntity.ok(optionalactivity.get());
