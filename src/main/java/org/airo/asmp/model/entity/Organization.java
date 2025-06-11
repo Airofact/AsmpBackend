@@ -21,7 +21,7 @@ public class Organization extends BusinessEntity{
     @Column(columnDefinition = "text")
     String description;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "creatorId", nullable = false)
     Alumni alumni;
 }

@@ -14,8 +14,10 @@ import org.airo.asmp.repository.entity.OrganizationRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/organization")
@@ -30,13 +32,13 @@ public class OrganizationController {
      public ResponseEntity<?> createOrganization(@RequestBody OrganizationCreateDto dto) {
          Admin admin = adminRepository.findById(dto.addedById())
                  .orElseThrow(() -> new RuntimeException("Admin not found"));
-
+         Alumni alumni = alumniRepository.findById(dto.alumni()).orElseThrow(() -> new RuntimeException("Alumni not found"));
          Organization organization = new Organization();
          organization.setName(dto.name());
          organization.setDescription(dto.description());
          organization.setType(Type.valueOf(dto.type()));
          organization.setAddedBy(admin);
-         Alumni alumni = dto.alumni();
+         organization.setAlumni(alumni);
          if (alumni != null) {
              alumni.setAddedBy(admin);
              organization.setAlumni(alumni);
@@ -52,6 +54,11 @@ public class OrganizationController {
             return ResponseEntity.ok(organization.get());
         }
         else {return ResponseEntity.ok(null);}
+     }
+     //通过name查询
+     @GetMapping("/search/byName")
+     public List<Organization> searchByName(@RequestParam("name") String name){
+         return organizationRepository.findByName(name);
      }
      //删除
     @DeleteMapping("/delete/{id}")

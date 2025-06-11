@@ -2,6 +2,8 @@ package org.airo.asmp.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.airo.asmp.dto.entity.ActivityCreateDto;
+import org.airo.asmp.dto.entity.ActivityStatusCountDto;
+import org.airo.asmp.dto.entity.ActivityTimeRangeDto;
 import org.airo.asmp.dto.entity.ActivityUpdateDto;
 import org.airo.asmp.model.activity.Activity;
 import org.airo.asmp.model.entity.Organization;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -97,4 +100,31 @@ public class ActivityController {
             return ResponseEntity.ok(null);
         }
     }
+    @GetMapping("/statusCount")
+    public List<ActivityStatusCountDto> getActivityCountByStatus() {
+        return activityRepository.countByStatusGroup();
+    }
+
+    // 1. 查询活动列表（时间段）
+    @PostMapping("/query/timeRange")
+    public List<Activity> queryByTimeRange(@RequestBody ActivityTimeRangeDto dto) {
+        return activityRepository.findByTimeRange(dto.start(), dto.end());
+    }
+
+    // 2. 时间段内按状态分组统计
+    @PostMapping("/stat/timeRange")
+    public List<ActivityStatusCountDto> statByTimeRange(@RequestBody ActivityTimeRangeDto dto) {
+        return activityRepository.countByStatusInTimeRange(dto.start(), dto.end());
+    }
+    //根据organizerid查询
+    @GetMapping("/byOrganizer/{organizerId}")
+    public List<Activity> getActivitiesByOrganizer(@PathVariable("organizerId") UUID organizerId) {
+        return activityRepository.findByOrganizerId(organizerId);
+    }
+    //根据title查询
+    @GetMapping("/byTitle")
+    public List<Activity> getActivitiesByTitle(@RequestParam("title") String title) {
+        return activityRepository.findByTitle(title);
+    }
 }
+

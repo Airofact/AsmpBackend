@@ -9,4 +9,4 @@ public record OrganizationCreateDto(String name,
         String type,
         String description,
         UUID addedById,
-        Alumni alumni) {}
+        UUID alumni) {}
