@@ -1,11 +1,15 @@
 package org.airo.asmp.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.airo.asmp.model.activity.Activity;
 import org.airo.asmp.model.notice.Notice;
+import org.airo.asmp.model.notice.Type;
 import org.airo.asmp.repository.NoticeRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.airo.asmp.dto.entity.NoticeCreateDto;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,7 +47,7 @@ public class NoticeController {
         }
     }
 
-    //查询活动
+    //查询
     @GetMapping("search/{id}")
     public ResponseEntity<Notice> searchActivity(@PathVariable("id") UUID id) {
         if (noticeRepository.existsById(id)) {
@@ -54,8 +58,19 @@ public class NoticeController {
             return ResponseEntity.ok(null);
         }
     }
-
-    //删除活动
+//根据类型查询
+    @GetMapping("/byType")
+    public ResponseEntity<List<Notice>> getNoticesByType(@RequestParam ("type") Type type) {
+        List<Notice> notices = noticeRepository.findByType(type);
+        return ResponseEntity.ok(notices);
+    }
+//根据title查询
+    @GetMapping("/byTitle")
+    public ResponseEntity<List<Notice>> getNoticesByTitle(@RequestParam("title") String title) {
+        List<Notice> notices = noticeRepository.findByTitle(title);
+        return ResponseEntity.ok(notices);
+    }
+    //删除
     @DeleteMapping("delete/{id}")
     public ResponseEntity<String> deleteActivity(@PathVariable("id") UUID id) {
         if (noticeRepository.existsById(id)) {

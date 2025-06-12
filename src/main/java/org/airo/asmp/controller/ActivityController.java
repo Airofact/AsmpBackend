@@ -28,7 +28,7 @@ public class ActivityController {
     @PostMapping("/add")
     public ResponseEntity<String> addActivity(@RequestBody ActivityCreateDto dto) {
         Organization organization = organizationRepository.findById(dto.organizer()).orElseThrow(() -> new RuntimeException("Organization not found"));
-        if(dto.startTime().isBefore(dto.endTime())) {
+        if(dto.startTime().isBefore(dto.endTime())&&dto.startTime().isAfter(LocalDateTime.now())) {
             Activity activity = new Activity();
             activity.setStartTime(dto.startTime());
             activity.setEndTime(dto.endTime());

@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -75,5 +76,15 @@ public class ActivityApplicationController {
             return ResponseEntity.ok(null);
         }
         }
+//根据realname，title，signedin进行申请的查询
+    @GetMapping("/search")
+    public ResponseEntity<List<ActivityApplication>> searchApplications(
+            @RequestParam(name = "realName",required = false) String realName,
+            @RequestParam(name = "title",required = false) String title,
+            @RequestParam(name = "signedIn",required = false) Boolean signedIn) {
+        List<ActivityApplication> result = activityApplicationRepository
+                .findByRealNameAndTitleAndSignedIn(realName, title, signedIn);
+        return ResponseEntity.ok(result);
+    }
     }
 
