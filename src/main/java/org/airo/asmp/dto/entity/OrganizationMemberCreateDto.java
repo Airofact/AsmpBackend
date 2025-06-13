@@ -1,14 +1,15 @@
 package org.airo.asmp.dto.entity;
 
-import org.airo.asmp.model.OrganizationMember.OrganizationAlumniId;
-import org.airo.asmp.model.OrganizationMember.Role;
-import org.airo.asmp.model.entity.Organization;
+import org.airo.asmp.model.entity.OrganizationAlumniId;
+import org.airo.asmp.model.entity.OrganizationMember;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+/**
+ * DTO for {@link org.airo.asmp.model.entity.OrganizationMember}
+ * Represents a request to create a new organization member with a specific role.
+ */
 
 public record OrganizationMemberCreateDto(
         OrganizationAlumniId id,
-        Role role
+        OrganizationMember.Role role
 ) {
 }

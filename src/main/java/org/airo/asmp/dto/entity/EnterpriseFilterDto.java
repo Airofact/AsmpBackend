@@ -1,17 +1,22 @@
 package org.airo.asmp.dto.entity;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
-public record EnterpriseFilterDto(
-		UUID id,
-		UUID addedById,
-		String name,
-		String field,
-		String address,
-		String contactPerson,
-		String contactEmail,
-		String contactPhone,
-		LocalDateTime addedAtBegin,
-		LocalDateTime addedAtEnd
-) {}
+/**
+ * DTO for filtering {@link org.airo.asmp.model.entity.Enterprise}
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+public class EnterpriseFilterDto extends BusinessEntityFilterDto {
+		private String name;
+		private String field;
+		private String address;
+		private String contactPerson;
+		private String contactEmail;
+		private String contactPhone;
+}

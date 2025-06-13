@@ -11,7 +11,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Inheritance(strategy = InheritanceType.JOINED)
 @NoArgsConstructor
 public abstract class BusinessEntity {
@@ -19,10 +20,6 @@ public abstract class BusinessEntity {
 	@UuidGenerator
 	@Immutable
 	protected UUID id;
-
-	@ManyToOne
-	@NotNull
-	protected Admin addedBy;
 
 	@NotNull
 	protected LocalDateTime addedAt;

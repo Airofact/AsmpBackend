@@ -1,13 +1,17 @@
 package org.airo.asmp.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.airo.asmp.model.activity.Activity;
+import org.airo.asmp.dto.NoticeCreateDto;
+import org.airo.asmp.dto.NoticeFilterDto;
+import org.airo.asmp.dto.NoticeUpdateDto;
+import org.airo.asmp.mapper.NoticeMapper;
 import org.airo.asmp.model.notice.Notice;
-import org.airo.asmp.model.notice.Type;
 import org.airo.asmp.repository.NoticeRepository;
+import org.airo.asmp.service.FilterService;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.airo.asmp.dto.entity.NoticeCreateDto;
+import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,70 +19,57 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/notice")
+@RequestMapping("/api/notice")
 public class NoticeController {
     private final NoticeRepository noticeRepository;
-    //增加通知
-    @PostMapping("/add")
-    public ResponseEntity<String> addActivity(@RequestBody NoticeCreateDto dto) {
-        Notice notice = new Notice();
-        notice.setTitle(dto.title());
-        notice.setContent(dto.content());
-        notice.setType(dto.type());
+    private final NoticeMapper noticeMapper;
+    private final FilterService filterService;
+
+    // 通知注册
+    @PostMapping
+    public ResponseEntity<String> add(@Valid @RequestBody NoticeCreateDto noticeCreateDto) {
+        Notice notice = noticeMapper.toEntity(noticeCreateDto);
         noticeRepository.save(notice);
-        return ResponseEntity.ok("添加成功");
+        return ResponseEntity.ok("通知添加成功！");
     }
 
+    // 通知信息修改
+    @PutMapping("/{id}")
+    public ResponseEntity<String> update(@PathVariable UUID id, @Valid @RequestBody NoticeUpdateDto noticeUpdateDto) {
+        var notice = noticeRepository.findById(id);
+        if (notice.isEmpty()) {
+            return ResponseEntity.badRequest().body("id为 %s 的通知不存在！".formatted(id));
+        }
 
-    //修改通知
-    @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateActivity(@RequestBody NoticeCreateDto newData, @PathVariable("id") UUID id) {
-        if (noticeRepository.existsById(id)) {
-            Optional<Notice> optionalNotice = noticeRepository.findById(id);
-            Notice updateNotice=optionalNotice.get();
-            updateNotice.setTitle(newData.title());
-            updateNotice.setContent(newData.content());
-            updateNotice.setType(newData.type());
-            noticeRepository.save(updateNotice);
-            return ResponseEntity.ok("修改成功");
-        }
-        else{
-            return ResponseEntity.ok("未找到通知");
-        }
+        Notice existingNotice = notice.get();
+        noticeMapper.partialUpdate(noticeUpdateDto, existingNotice);
+        noticeRepository.save(existingNotice);
+        return ResponseEntity.ok("通知信息修改成功！");
     }
 
-    //查询
-    @GetMapping("search/{id}")
-    public ResponseEntity<Notice> searchActivity(@PathVariable("id") UUID id) {
-        if (noticeRepository.existsById(id)) {
-            Optional<Notice> optionalNotice = noticeRepository.findById(id);
-            return ResponseEntity.ok(optionalNotice.get());
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> delete(@PathVariable UUID id) {
+        if (!noticeRepository.existsById(id)) {
+            return ResponseEntity.badRequest().body("id为 %s 的通知不存在！".formatted(id));
         }
-        else{
-            return ResponseEntity.ok(null);
-        }
+        noticeRepository.deleteById(id);
+        return ResponseEntity.ok("通知删除成功！");
     }
-//根据类型查询
-    @GetMapping("/byType")
-    public ResponseEntity<List<Notice>> getNoticesByType(@RequestParam ("type") Type type) {
-        List<Notice> notices = noticeRepository.findByType(type);
-        return ResponseEntity.ok(notices);
+
+    // 根据ID查询通知
+    @GetMapping("/{id}")
+    public ResponseEntity<Notice> getById(@PathVariable UUID id) {
+        Optional<Notice> notice = noticeRepository.findById(id);
+        return notice.map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
     }
-//根据title查询
-    @GetMapping("/byTitle")
-    public ResponseEntity<List<Notice>> getNoticesByTitle(@RequestParam("title") String title) {
-        List<Notice> notices = noticeRepository.findByTitle(title);
-        return ResponseEntity.ok(notices);
-    }
-    //删除
-    @DeleteMapping("delete/{id}")
-    public ResponseEntity<String> deleteActivity(@PathVariable("id") UUID id) {
-        if (noticeRepository.existsById(id)) {
-            noticeRepository.deleteById(id);
-            return ResponseEntity.ok("删除成功");
-        }
-        else{
-            return ResponseEntity.ok("未找到通知");
-        }
+
+    @GetMapping
+    public ResponseEntity<List<Notice>> getAll() {
+        return ResponseEntity.ok(noticeRepository.findAll());
+    }    // 通知分组查询
+    @GetMapping("/filter")
+    public List<Notice> filter(@ParameterObject NoticeFilterDto noticeFilterDto) {
+        return filterService.filterNotice(noticeFilterDto);
     }
 }

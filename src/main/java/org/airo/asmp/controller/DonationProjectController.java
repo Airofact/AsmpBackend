@@ -1,0 +1,228 @@
+package org.airo.asmp.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.airo.asmp.dto.donation.DonationProjectCreateDto;
+import org.airo.asmp.dto.donation.DonationProjectFilterDto;
+import org.airo.asmp.dto.donation.DonationProjectUpdateDto;
+import org.airo.asmp.model.donation.DonationProject;
+import org.airo.asmp.service.DonationProjectService;
+import org.airo.asmp.service.FilterService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/donation-projects")
+@RequiredArgsConstructor
+public class DonationProjectController {
+    
+    private final DonationProjectService donationProjectService;
+    private final FilterService filterService;
+
+    /**
+     * 创建捐赠项目
+     */
+    @PostMapping
+    public ResponseEntity<DonationProject> createProject(@Valid @RequestBody DonationProjectCreateDto createDto) {
+        try {
+            DonationProject project = donationProjectService.createProject(createDto);
+            return new ResponseEntity<>(project, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+    
+    /**
+     * 更新捐赠项目
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<DonationProject> updateProject(@PathVariable UUID id, 
+                                                        @Valid @RequestBody DonationProjectUpdateDto updateDto) {
+        try {
+            DonationProject project = donationProjectService.updateProject(id, updateDto);
+            return ResponseEntity.ok(project);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+    
+    /**
+     * 删除捐赠项目
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProject(@PathVariable UUID id) {
+        try {
+            donationProjectService.deleteProject(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+    
+    /**
+     * 根据ID查询项目
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<DonationProject> getProjectById(@PathVariable UUID id) {
+        return donationProjectService.findById(id)
+                .map(project -> ResponseEntity.ok(project))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+      /**
+     * 查询所有项目
+     */
+    @GetMapping
+    public ResponseEntity<List<DonationProject>> getAllProjects() {
+        List<DonationProject> projects = donationProjectService.findAll();
+        return ResponseEntity.ok(projects);
+    }
+      /**
+     * 根据条件查询项目
+     */
+    @PostMapping("/filter")
+    public ResponseEntity<List<DonationProject>> searchProjects(@RequestBody DonationProjectFilterDto filter) {
+        List<DonationProject> projects = filterService.filterDonationProject(filter);
+        return ResponseEntity.ok(projects);
+    }
+    
+    /**
+     * 根据状态查询项目
+     */
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<DonationProject>> getProjectsByStatus(@PathVariable DonationProject.ProjectStatus status) {
+        List<DonationProject> projects = donationProjectService.findByStatus(status);
+        return ResponseEntity.ok(projects);
+    }
+    
+    /**
+     * 根据分类查询项目
+     */
+    @GetMapping("/category/{category}")
+    public ResponseEntity<List<DonationProject>> getProjectsByCategory(@PathVariable String category) {
+        List<DonationProject> projects = donationProjectService.findByCategory(category);
+        return ResponseEntity.ok(projects);
+    }
+    
+    /**
+     * 根据发起者查询项目
+     */
+    @GetMapping("/organizer/{organizerId}")
+    public ResponseEntity<List<DonationProject>> getProjectsByOrganizer(@PathVariable UUID organizerId) {
+        List<DonationProject> projects = donationProjectService.findByOrganizer(organizerId);
+        return ResponseEntity.ok(projects);
+    }
+    
+    /**
+     * 查询活跃项目
+     */
+    @GetMapping("/active")
+    public ResponseEntity<List<DonationProject>> getActiveProjects() {
+        List<DonationProject> projects = donationProjectService.findActiveProjects();
+        return ResponseEntity.ok(projects);
+    }
+    
+    /**
+     * 查询已达到目标的项目
+     */
+    @GetMapping("/target-reached")
+    public ResponseEntity<List<DonationProject>> getTargetReachedProjects() {
+        List<DonationProject> projects = donationProjectService.findTargetReachedProjects();
+        return ResponseEntity.ok(projects);
+    }
+    
+    /**
+     * 关闭项目
+     */
+    @PostMapping("/{id}/close")
+    public ResponseEntity<DonationProject> closeProject(@PathVariable UUID id) {
+        try {
+            DonationProject project = donationProjectService.closeProject(id);
+            return ResponseEntity.ok(project);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+    
+    /**
+     * 暂停项目
+     */
+    @PostMapping("/{id}/suspend")
+    public ResponseEntity<DonationProject> suspendProject(@PathVariable UUID id) {        try {
+            DonationProject project = donationProjectService.suspendProject(id);
+            return ResponseEntity.ok(project);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+    
+    /**
+     * 完成项目
+     */
+    @PostMapping("/{id}/complete")
+    public ResponseEntity<DonationProject> completeProject(@PathVariable UUID id) {        try {
+            DonationProject project = donationProjectService.completeProject(id);
+            return ResponseEntity.ok(project);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+    
+    /**
+     * 检查项目是否可以接受捐赠
+     */
+    @GetMapping("/{id}/can-donate")
+    public ResponseEntity<Boolean> canAcceptDonation(@PathVariable UUID id) {
+        try {
+            boolean canDonate = donationProjectService.canAcceptDonation(id);
+            return ResponseEntity.ok(canDonate);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
+        }
+    }
+    
+    /**
+     * 更新项目当前金额
+     */
+    @PutMapping("/{id}/amount")
+    public ResponseEntity<DonationProject> updateCurrentAmount(@PathVariable UUID id, 
+                                                              @RequestParam BigDecimal amount) {        try {
+            DonationProject project = donationProjectService.updateCurrentAmount(id, amount);
+            return ResponseEntity.ok(project);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+    
+    /**
+     * 获取项目进度信息
+     */
+    @GetMapping("/{id}/progress")
+    public ResponseEntity<ProjectProgressInfo> getProjectProgress(@PathVariable UUID id) {
+        return donationProjectService.findById(id)
+                .map(project -> {
+                    ProjectProgressInfo info = new ProjectProgressInfo(
+                            project.getCurrentAmount(),
+                            project.getTargetAmount(),
+                            project.getProgress(),
+                            project.isTargetReached()
+                    );
+                    return ResponseEntity.ok(info);
+                })
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+    
+    /**
+     * 项目进度信息DTO
+     */
+    public record ProjectProgressInfo(
+            BigDecimal currentAmount,
+            BigDecimal targetAmount,
+            Double progressPercentage,
+            Boolean targetReached
+    ) {}
+}

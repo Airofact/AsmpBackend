@@ -7,14 +7,11 @@ import org.mapstruct.*;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface EnterpriseMapper {
-	@Mapping(source = "addedById", target = "addedBy.id")
 	Enterprise toEntity(EnterpriseCreateDto enterpriseDto);
 
-	@Mapping(source = "addedBy.id", target = "addedById")
 	EnterpriseCreateDto toDto(Enterprise enterprise);
 
 	@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-	@Mapping(source = "addedById", target = "addedBy.id")
 	Enterprise partialUpdate(EnterpriseCreateDto enterpriseDto, @MappingTarget Enterprise enterprise);
 
 

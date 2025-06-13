@@ -1,27 +1,27 @@
 package org.airo.asmp.dto.entity;
 
-import jakarta.validation.constraints.NotNull;
-import lombok.Value;
-import org.airo.asmp.model.Gender;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import org.airo.asmp.model.entity.Alumni;
 
-import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * DTO for {@link org.airo.asmp.model.entity.Alumni}
  */
-public record AlumniFilterDto (
-	UUID id,
-	LocalDateTime addedAtBegin,
-	LocalDateTime addedAtEnd,
-	String studentId,
-	String realName,
-	Gender gender,
-	LocalDate dateOfBirthBegin,
-	LocalDate dateOfBirthEnd,
-	String address,
-	String companyName,
-	String currentJob
-) {}
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+public class AlumniFilterDto extends BusinessEntityFilterDto {
+	private String studentId;
+	private String realName;
+	private Alumni.Gender gender;
+	private LocalDate dateOfBirthBegin;
+	private LocalDate dateOfBirthEnd;
+	private String address;
+	private String companyName;
+	private String currentJob;
+}

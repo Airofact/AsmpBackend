@@ -1,7 +1,7 @@
 package org.airo.asmp.mapper.entity;
 
-import org.airo.asmp.dto.entity.JobApplicationCreateDto;
-import org.airo.asmp.dto.entity.JobApplicationUpdateDto;
+import org.airo.asmp.dto.job.JobApplicationCreateDto;
+import org.airo.asmp.dto.job.JobApplicationUpdateDto;
 import org.airo.asmp.model.job.JobApplication;
 import org.mapstruct.*;
 

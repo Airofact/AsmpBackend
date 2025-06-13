@@ -25,6 +25,11 @@ public class Notice {
     @Column(nullable = false)
     Type type;
 
+	public enum Type {
+		NEWS,
+		ANNOUNCEMENT,
+		NOTICE
+	}
 }
 
 

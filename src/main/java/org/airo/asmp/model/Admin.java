@@ -2,7 +2,6 @@ package org.airo.asmp.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;

@@ -1,17 +1,23 @@
 package org.airo.asmp.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.airo.asmp.dto.entity.ActivityCreateDto;
-import org.airo.asmp.dto.entity.ActivityStatusCountDto;
-import org.airo.asmp.dto.entity.ActivityTimeRangeDto;
-import org.airo.asmp.dto.entity.ActivityUpdateDto;
+import org.airo.asmp.dto.activity.ActivityCreateDto;
+import org.airo.asmp.dto.activity.ActivityFilterDto;
+import org.airo.asmp.dto.activity.ActivityStatusCountDto;
+import org.airo.asmp.dto.activity.ActivityTimeRangeDto;
+import org.airo.asmp.dto.activity.ActivityUpdateDto;
+import org.airo.asmp.mapper.activity.ActivityMapper;
 import org.airo.asmp.model.activity.Activity;
+import org.airo.asmp.model.activity.Status;
 import org.airo.asmp.model.entity.Organization;
 import org.airo.asmp.repository.ActivityRepository;
-import org.airo.asmp.repository.entity.AlumniRepository;
 import org.airo.asmp.repository.entity.OrganizationRepository;
+import org.airo.asmp.service.ActivityService;
+import org.airo.asmp.service.FilterService;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,107 +30,110 @@ import java.util.UUID;
 public class ActivityController {
     private final ActivityRepository activityRepository;
     private final OrganizationRepository organizationRepository;
-    //增加活动
-    @PostMapping("/add")
-    public ResponseEntity<String> addActivity(@RequestBody ActivityCreateDto dto) {
-        Organization organization = organizationRepository.findById(dto.organizer()).orElseThrow(() -> new RuntimeException("Organization not found"));
-        if(dto.startTime().isBefore(dto.endTime())&&dto.startTime().isAfter(LocalDateTime.now())) {
-            Activity activity = new Activity();
-            activity.setStartTime(dto.startTime());
-            activity.setEndTime(dto.endTime());
-            activity.setLocation(dto.location());
-            activity.setDescription(dto.description());
-            activity.setTitle(dto.title());
-            activity.setStatus(dto.status());
-            activity.setMaxParticipants(dto.maxParticipants());
+    private final ActivityMapper activityMapper;
+    private final ActivityService activityService;
+    private final FilterService filterService;
+
+    // 活动注册
+    @PostMapping
+    public ResponseEntity<String> add(@Valid @RequestBody ActivityCreateDto activityCreateDto) {
+        Organization organization = organizationRepository.findById(activityCreateDto.organizer()).orElseThrow(() -> new RuntimeException("组织不存在"));
+        if(activityCreateDto.startTime().isBefore(activityCreateDto.endTime())) {
+            Activity activity = activityMapper.toEntity(activityCreateDto);
             activity.setOrganizer(organization);
             activityRepository.save(activity);
-            return ResponseEntity.ok("活动添加成功");
-        }
-        else {
-            return ResponseEntity.ok("添加失败，请检查日期");
-        }
-    }
-
-    // 删除活动
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteActivity(@PathVariable("id") UUID id) {
-
-        if (activityRepository.existsById(id)) {
-            Optional<Activity> optionalactivity = activityRepository.findById(id);
-            Activity activity= optionalactivity.get();
-            if (LocalDateTime.now().isBefore(activity.getStartTime())) {
-                activityRepository.delete(activity);
-                return ResponseEntity.ok("活动删除成功");
-            } else {
-                return ResponseEntity.ok("活动已经在举行或已结束，无法删除");
-            }
-        }
-        else {
-            return ResponseEntity.ok("未找到活动");
+            return ResponseEntity.ok("活动添加成功！");
+        } else {
+            return ResponseEntity.badRequest().body("添加失败，请检查日期");
         }
     }
 
-    //修改活动
-    @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateActivity(@PathVariable("id") UUID id, @RequestBody ActivityUpdateDto newData) {
-        if (activityRepository.existsById(id)&&newData.startTime().isBefore(newData.endTime())) {
-            Optional<Activity> optionalactivity = activityRepository.findById(id);
-            Activity updateactivity= optionalactivity.get();
-            updateactivity.setStartTime(newData.startTime());
-            updateactivity.setTitle(newData.title());
-            updateactivity.setDescription(newData.description());
-            updateactivity.setEndTime(newData.endTime());
-            updateactivity.setLocation(newData.location());
-            updateactivity.setMaxParticipants(newData.maxParticipants());
-            updateactivity.setStatus(newData.status());
-            updateactivity.setOrganizer(updateactivity.getOrganizer());
-            activityRepository.save(updateactivity);
-            return ResponseEntity.ok("修改成功");
+    // 活动信息修改
+    @PutMapping("/{id}")
+    public ResponseEntity<String> update(@PathVariable UUID id, @Valid @RequestBody ActivityUpdateDto activityUpdateDto) {
+        var activity = activityRepository.findById(id);
+        if (activity.isEmpty()) {
+            return ResponseEntity.badRequest().body("id为 %s 的活动不存在！".formatted(id));
         }
-        else if (newData.startTime().isAfter(newData.endTime()) ){
-            return ResponseEntity.ok("修改失败，请检查日期");
+        
+        if(activityUpdateDto.startTime().isAfter(activityUpdateDto.endTime())) {
+            return ResponseEntity.badRequest().body("修改失败，请检查日期");
         }
-        else {
-            return ResponseEntity.notFound().build();
+
+        Activity existingActivity = activity.get();
+        activityMapper.partialUpdate(activityUpdateDto, existingActivity);
+        activityRepository.save(existingActivity);
+        return ResponseEntity.ok("活动信息修改成功！");
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> delete(@PathVariable UUID id) {
+        Optional<Activity> optionalActivity = activityRepository.findById(id);
+        if (optionalActivity.isEmpty()) {
+            return ResponseEntity.badRequest().body("id为 %s 的活动不存在！".formatted(id));
+        }
+        Activity activity = optionalActivity.get();
+        if (LocalDateTime.now().isBefore(activity.getStartTime())) {
+            activityRepository.deleteById(id);
+            return ResponseEntity.ok("活动删除成功！");
+        } else {
+            return ResponseEntity.badRequest().body("活动已经在举行或已结束，无法删除");
         }
     }
-//查询活动
-    @GetMapping("/search/{id}")
-    public ResponseEntity<Activity> searchActivity(@PathVariable("id") UUID id) {
-        if (activityRepository.existsById(id)) {
-            Optional<Activity> optionalactivity = activityRepository.findById(id);
-            return ResponseEntity.ok(optionalactivity.get());
-        }
-        else {
-            return ResponseEntity.ok(null);
-        }
+
+    // 根据ID查询活动
+    @GetMapping("/{id}")
+    public ResponseEntity<Activity> getById(@PathVariable UUID id) {
+        Optional<Activity> activity = activityRepository.findById(id);
+        return activity.map(ResponseEntity::ok)
+                      .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping
+    public ResponseEntity<List<Activity>> getAll() {
+        return ResponseEntity.ok(activityRepository.findAll());
+    }
+
+    // 活动分组查询（包含状态过滤）
+    @GetMapping("/filter")
+    public List<Activity> filter(@RequestBody ActivityFilterDto activityFilterDto) {
+        return filterService.filterActivity(activityFilterDto);
+    }
+
     @GetMapping("/statusCount")
     public List<ActivityStatusCountDto> getActivityCountByStatus() {
-        return activityRepository.countByStatusGroup();
-    }
-
-    // 1. 查询活动列表（时间段）
+        return activityService.getActivityCountByStatus();
+    }    // 1. 查询活动列表（时间段）
     @PostMapping("/query/timeRange")
     public List<Activity> queryByTimeRange(@RequestBody ActivityTimeRangeDto dto) {
-        return activityRepository.findByTimeRange(dto.start(), dto.end());
+        return activityService.getActivitiesInTimeRange(dto.start(), dto.end());
     }
 
     // 2. 时间段内按状态分组统计
     @PostMapping("/stat/timeRange")
     public List<ActivityStatusCountDto> statByTimeRange(@RequestBody ActivityTimeRangeDto dto) {
-        return activityRepository.countByStatusInTimeRange(dto.start(), dto.end());
+        return activityService.getActivityCountByStatusInTimeRange(dto.start(), dto.end());
     }
-    //根据organizerid查询
+
+    // 根据organizerid查询
     @GetMapping("/byOrganizer/{organizerId}")
     public List<Activity> getActivitiesByOrganizer(@PathVariable("organizerId") UUID organizerId) {
         return activityRepository.findByOrganizerId(organizerId);
-    }
-    //根据title查询
+    }    // 根据title查询
     @GetMapping("/byTitle")
     public List<Activity> getActivitiesByTitle(@RequestParam("title") String title) {
-        return activityRepository.findByTitle(title);
+        return activityRepository.findByTitleContaining(title);
+    }
+    
+    // 根据status查询活动
+    @GetMapping("/byStatus")
+    public List<Activity> getActivitiesByStatus(@RequestParam("status") String status) {
+        try {
+            Status statusEnum = Status.valueOf(status);
+            return activityService.getActivitiesByStatus(statusEnum);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("无效的状态值: " + status);
+        }
     }
 }
 

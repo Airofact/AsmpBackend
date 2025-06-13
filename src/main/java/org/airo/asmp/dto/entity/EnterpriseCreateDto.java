@@ -6,6 +6,11 @@ import java.util.UUID;
 /**
  * DTO for {@link org.airo.asmp.model.entity.Enterprise}
  */
-public record EnterpriseCreateDto(UUID addedById, String name, String field, String address, String contactPerson,
-								  String contactEmail, String contactPhone) implements Serializable {
-}
+public record EnterpriseCreateDto(
+		String name,
+		String field,
+		String address,
+		String contactPerson,
+		String contactEmail,
+		String contactPhone
+) implements Serializable { }

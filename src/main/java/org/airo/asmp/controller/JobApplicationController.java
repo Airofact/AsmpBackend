@@ -1,30 +1,34 @@
 package org.airo.asmp.controller;
 
-import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
-import org.airo.asmp.dto.entity.JobApplicationCreateDto;
-import org.airo.asmp.dto.entity.JobApplicationFilterDto;
-import org.airo.asmp.dto.entity.JobApplicationUpdateDto;
+import org.airo.asmp.dto.job.JobApplicationCreateDto;
+import org.airo.asmp.dto.job.JobApplicationFilterDto;
+import org.airo.asmp.dto.job.JobApplicationUpdateDto;
 import org.airo.asmp.mapper.entity.JobApplicationMapper;
 import org.airo.asmp.model.job.ApplicationStatus;
 import org.airo.asmp.model.job.JobApplication;
 import org.airo.asmp.repository.JobApplicationRepository;
+import org.airo.asmp.repository.JobPostRepository;
+import org.airo.asmp.repository.entity.AlumniRepository;
+import org.airo.asmp.service.FilterService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/jobapplication")
+@RequestMapping("/api/job/apply")
 @RequiredArgsConstructor
 public class JobApplicationController {
     private final JobApplicationRepository jobApplicationRepository;
     private final JobApplicationMapper jobApplicationMapper;
+    private final FilterService filterService;
+    private final AlumniRepository alumniRepository;
+    private final JobPostRepository jobPostRepository;
 
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<String> createJobApplication(@RequestBody JobApplicationCreateDto dto) {
         // 检查是否已经申请过
         var existing = jobApplicationRepository.findByJobPostIdAndAlumniId(dto.jobPostId(), dto.alumniId());
@@ -32,14 +36,26 @@ public class JobApplicationController {
             return ResponseEntity.badRequest().body("您已经申请过该职位");
         }
 
+        var alumni = alumniRepository.findById(dto.alumniId());
+        if (alumni.isEmpty()) {
+            return ResponseEntity.badRequest().body("Alumni ID 不存在");
+        }
+
+        var jobPost = jobPostRepository.findById(dto.jobPostId());
+        if (jobPost.isEmpty()) {
+            return ResponseEntity.badRequest().body("Job Post ID 不存在");
+        }
+
         JobApplication jobApplication = jobApplicationMapper.toEntity(dto);
+        jobApplication.setAlumni(alumni.get());
+        jobApplication.setJobPost(jobPost.get());
         jobApplication.setApplyTime(LocalDateTime.now());
         jobApplication.setStatus(ApplicationStatus.pending);
         jobApplicationRepository.save(jobApplication);
         return ResponseEntity.ok("申请提交成功");
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<String> updateJobApplication(@PathVariable UUID id, @RequestBody JobApplicationUpdateDto dto) {
         var jobApplication = jobApplicationRepository.findById(id);
         if (jobApplication.isEmpty()) {
@@ -52,7 +68,7 @@ public class JobApplicationController {
         return ResponseEntity.ok("申请状态更新成功");
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteJobApplication(@PathVariable UUID id) {
         if (jobApplicationRepository.existsById(id)) {
             jobApplicationRepository.deleteById(id);
@@ -61,35 +77,20 @@ public class JobApplicationController {
         return ResponseEntity.badRequest().body("申请记录不存在");
     }
 
-    @GetMapping("/search/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<JobApplication> getJobApplication(@PathVariable UUID id) {
         var jobApplication = jobApplicationRepository.findById(id);
         return jobApplication.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping
+    public ResponseEntity<List<JobApplication>> getAllJobApplications() {
+        return ResponseEntity.ok(jobApplicationRepository.findAll());
+    }
+
     @GetMapping("/filter")
     public List<JobApplication> filterJobApplications(@RequestBody JobApplicationFilterDto filterDto) {
-        return jobApplicationRepository.findAll((root, query, builder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            if (filterDto.id() != null) {
-                predicates.add(builder.equal(root.get("id"), filterDto.id()));
-            }
-            if (filterDto.jobPostId() != null) {
-                predicates.add(builder.equal(root.get("jobPost").get("id"), filterDto.jobPostId()));
-            }
-            if (filterDto.alumniId() != null) {
-                predicates.add(builder.equal(root.get("alumni").get("id"), filterDto.alumniId()));
-            }
-            if (filterDto.status() != null) {
-                predicates.add(builder.equal(root.get("status"), filterDto.status()));
-            }
-            if (filterDto.applyTime() != null) {
-                predicates.add(builder.greaterThanOrEqualTo(root.get("applyTime"), filterDto.applyTime()));
-            }
-
-            return builder.and(predicates.toArray(new Predicate[0]));
-        });
+        return filterService.filterJobApplication(filterDto);
     }
 
     @GetMapping("/by-jobpost/{jobPostId}")

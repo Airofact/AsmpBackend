@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.UUID;
-
 @Entity
 @Getter
 @Setter
@@ -14,14 +12,19 @@ public class Organization extends BusinessEntity{
     @Column(columnDefinition = "varchar(100)")
     String name;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    Type type =Type.interest;
+    Type type =Type.INTEREST;
 
     @Column(columnDefinition = "text")
     String description;
 
     @ManyToOne
-    @JoinColumn(name = "creatorId", nullable = false)
-    Alumni alumni;
+    @JoinColumn(name = "creator_id", nullable = false)
+    Alumni creator;
+
+    public enum Type {
+        REGIONAL,
+        INDUSTRIAL,
+        INTEREST
+    }
 }
