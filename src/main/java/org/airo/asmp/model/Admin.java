@@ -1,6 +1,5 @@
 package org.airo.asmp.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Getter;
@@ -15,7 +14,6 @@ import java.util.UUID;
 public class Admin {
 	@Id
 	@UuidGenerator
-	@JsonIgnore
 	private UUID id;
 
 	private String username;
