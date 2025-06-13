@@ -89,8 +89,8 @@ public class OrganizationController {
 		return organizationRepository.findByName(name);
 	}
 	// 组织分组查询
-	@GetMapping("/filter")
-	public List<Organization> filter(@ParameterObject OrganizationFilterDto organizationFilterDto) {
+	@PostMapping("/filter")
+	public List<Organization> filter(@RequestBody OrganizationFilterDto organizationFilterDto) {
 		return filterService.filterOrganization(organizationFilterDto);
 	}
 }

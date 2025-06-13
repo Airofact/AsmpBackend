@@ -68,8 +68,8 @@ public class NoticeController {
     public ResponseEntity<List<Notice>> getAll() {
         return ResponseEntity.ok(noticeRepository.findAll());
     }    // 通知分组查询
-    @GetMapping("/filter")
-    public List<Notice> filter(@ParameterObject NoticeFilterDto noticeFilterDto) {
+    @PostMapping("/filter")
+    public List<Notice> filter(@RequestBody NoticeFilterDto noticeFilterDto) {
         return filterService.filterNotice(noticeFilterDto);
     }
 }

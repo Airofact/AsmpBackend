@@ -65,7 +65,7 @@ public class EnterpriseController {
 		return enterpriseRepository.findAll();
 	}
 
-	@GetMapping("/filter")
+	@PostMapping("/filter")
 	public List<Enterprise> filter(
 			@RequestBody EnterpriseFilterDto filterDto
 	) {

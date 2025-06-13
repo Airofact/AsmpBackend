@@ -87,7 +87,7 @@ public class ActivityApplicationController {
     }
 
     // 申请分组查询
-    @GetMapping("/filter")
+    @PostMapping("/filter")
     public List<ActivityApplication> filter(@RequestBody ActivityApplicationFilterDto activityApplicationFilterDto) {
         return filterService.filterActivityApplication(activityApplicationFilterDto);
     }

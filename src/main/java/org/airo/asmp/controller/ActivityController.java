@@ -95,7 +95,7 @@ public class ActivityController {
     }
 
     // 活动分组查询（包含状态过滤）
-    @GetMapping("/filter")
+    @PostMapping("/filter")
     public List<Activity> filter(@RequestBody ActivityFilterDto activityFilterDto) {
         return filterService.filterActivity(activityFilterDto);
     }

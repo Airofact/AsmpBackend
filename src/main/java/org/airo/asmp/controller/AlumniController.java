@@ -81,7 +81,7 @@ public class AlumniController {
     }
 
     // 校友分组查询
-    @GetMapping("/filter")
+    @PostMapping("/filter")
     public List<Alumni> filter(@RequestBody AlumniFilterDto alumniFilterDto) {
         return filterService.filterAlumni(alumniFilterDto);
     }

@@ -88,7 +88,7 @@ public class JobApplicationController {
         return ResponseEntity.ok(jobApplicationRepository.findAll());
     }
 
-    @GetMapping("/filter")
+    @PostMapping("/filter")
     public List<JobApplication> filterJobApplications(@RequestBody JobApplicationFilterDto filterDto) {
         return filterService.filterJobApplication(filterDto);
     }

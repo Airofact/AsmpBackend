@@ -60,7 +60,9 @@ public class JobPostController {
     @GetMapping
     public List<JobPost> getJobPosts() {
         return jobPostRepository.findAll();
-    }    @GetMapping("/filter")
+    }
+
+    @PostMapping("/filter")
     public List<JobPost> filterJobPosts(@RequestBody JobPostFilterDto filterDto) {
         return filterService.filterJobPost(filterDto);
     }
