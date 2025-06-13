@@ -83,5 +83,11 @@ public class OrganizationMemberController {
     public List<String> getAlumniByOrganizationName(@RequestParam("organizationName") String organizationName) {
         return organizationMemberRepository.findAlumniRealNamesByOrganizationName(organizationName);
     }
+    //查询所有
+    @GetMapping("/getAll")
+    public ResponseEntity<List<OrganizationMember>> getAllOrganizationMembers() {
+        List<OrganizationMember> list = organizationMemberRepository.findAll();
+        return ResponseEntity.ok(list);
+    }
 }
 

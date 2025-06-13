@@ -70,6 +70,12 @@ public class NoticeController {
         List<Notice> notices = noticeRepository.findByTitle(title);
         return ResponseEntity.ok(notices);
     }
+    //查询所有活动
+    @GetMapping("/getAll")
+    public ResponseEntity<List<Notice>> getAllNotices() {
+        List<Notice> list = noticeRepository.findAll();
+        return ResponseEntity.ok(list);
+    }
     //删除
     @DeleteMapping("delete/{id}")
     public ResponseEntity<String> deleteActivity(@PathVariable("id") UUID id) {

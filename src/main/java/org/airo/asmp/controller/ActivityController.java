@@ -100,18 +100,19 @@ public class ActivityController {
             return ResponseEntity.ok(null);
         }
     }
+    //查询不同状态活动的数量
     @GetMapping("/statusCount")
     public List<ActivityStatusCountDto> getActivityCountByStatus() {
         return activityRepository.countByStatusGroup();
     }
 
-    // 1. 查询活动列表（时间段）
+    // 查询活动列表（时间段）
     @PostMapping("/query/timeRange")
     public List<Activity> queryByTimeRange(@RequestBody ActivityTimeRangeDto dto) {
         return activityRepository.findByTimeRange(dto.start(), dto.end());
     }
 
-    // 2. 时间段内按状态分组统计
+    // 时间段内按状态分组统计
     @PostMapping("/stat/timeRange")
     public List<ActivityStatusCountDto> statByTimeRange(@RequestBody ActivityTimeRangeDto dto) {
         return activityRepository.countByStatusInTimeRange(dto.start(), dto.end());
@@ -125,6 +126,12 @@ public class ActivityController {
     @GetMapping("/byTitle")
     public List<Activity> getActivitiesByTitle(@RequestParam("title") String title) {
         return activityRepository.findByTitle(title);
+    }
+    //查询所有活动
+    @GetMapping("/getAll")
+    public ResponseEntity<List<Activity>> getAllActivities() {
+        List<Activity> list = activityRepository.findAll();
+        return ResponseEntity.ok(list);
     }
 }
 

@@ -60,6 +60,12 @@ public class OrganizationController {
      public List<Organization> searchByName(@RequestParam("name") String name){
          return organizationRepository.findByName(name);
      }
+//查询所有组织
+    @GetMapping("/getAll")
+    public ResponseEntity<List<Organization>> getAllOrganizations() {
+        List<Organization> list = organizationRepository.findAll();
+        return ResponseEntity.ok(list);
+    }
      //删除
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteAlumni(@PathVariable("id") UUID id) {

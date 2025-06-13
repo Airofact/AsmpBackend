@@ -1,5 +1,6 @@
 package org.airo.asmp.model.activityapplication;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +17,7 @@ import java.util.UUID;
 public class ActivityApplication{
     @Id
     @UuidGenerator
+    @JsonIgnore
     UUID id;
 
 

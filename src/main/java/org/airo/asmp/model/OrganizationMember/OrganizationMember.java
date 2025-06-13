@@ -1,5 +1,6 @@
 package org.airo.asmp.model.OrganizationMember;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 public class OrganizationMember {
     @EmbeddedId
+    @JsonIgnore
     private OrganizationAlumniId id;
     @ManyToOne
     @MapsId("organizationId")

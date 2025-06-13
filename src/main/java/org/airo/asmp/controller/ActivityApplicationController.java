@@ -86,5 +86,11 @@ public class ActivityApplicationController {
                 .findByRealNameAndTitleAndSignedIn(realName, title, signedIn);
         return ResponseEntity.ok(result);
     }
+    //查询所有申请
+    @GetMapping("/getAll")
+    public ResponseEntity<List<ActivityApplication>> getAllActivityApplications() {
+        List<ActivityApplication> list = activityApplicationRepository.findAll();
+        return ResponseEntity.ok(list);
+    }
     }
 

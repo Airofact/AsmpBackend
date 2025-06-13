@@ -1,5 +1,6 @@
 package org.airo.asmp.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -18,6 +19,7 @@ public abstract class BusinessEntity {
 	@Id
 	@UuidGenerator
 	@Immutable
+	@JsonIgnore
 	protected UUID id;
 
 	@ManyToOne
