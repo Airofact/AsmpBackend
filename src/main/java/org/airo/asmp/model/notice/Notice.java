@@ -1,5 +1,6 @@
 package org.airo.asmp.model.notice;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,6 +14,7 @@ import java.util.UUID;
 public class Notice {
     @Id
     @UuidGenerator
+    @JsonIgnore
     UUID id;
 
     @Column(columnDefinition = "varchar(100)")
