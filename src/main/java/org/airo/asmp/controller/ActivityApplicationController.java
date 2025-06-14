@@ -5,13 +5,12 @@ import org.airo.asmp.dto.activity.ActivityApplicationCreateDto;
 import org.airo.asmp.dto.activity.ActivityApplicationFilterDto;
 import org.airo.asmp.dto.activity.ActivityApplicationUpdateDto;
 import org.airo.asmp.mapper.activity.ActivityApplicationMapper;
+import org.airo.asmp.model.activity.ActivityAlumniId;
 import org.airo.asmp.model.activity.ActivityApplication;
 import org.airo.asmp.repository.ActivityApplicationRepository;
 import org.airo.asmp.repository.ActivityRepository;
 import org.airo.asmp.repository.entity.AlumniRepository;
-import org.airo.asmp.service.FilterService;
-import org.airo.asmp.util.SpecificationBuilder;
-import org.springdoc.core.annotations.ParameterObject;
+import org.airo.asmp.service.ActivityApplicationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,18 +22,17 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/activity/apply")
+@RequestMapping("/api/activity/{actId}/application")
 @RequiredArgsConstructor
 public class ActivityApplicationController {
     private final ActivityApplicationRepository activityApplicationRepository;
     private final ActivityRepository activityRepository;
     private final AlumniRepository alumniRepository;
     private final ActivityApplicationMapper activityApplicationMapper;
-    private final FilterService filterService;
-
-    @PostMapping
-    public ResponseEntity<String> add(@Valid @RequestBody ActivityApplicationCreateDto activityApplicationCreateDto) {
-        UUID activityId = activityApplicationCreateDto.activityId();
+    private final ActivityApplicationService activityApplicationService;    @PostMapping
+    public ResponseEntity<String> add(@PathVariable UUID actId, 
+                                     @Valid @RequestBody ActivityApplicationCreateDto activityApplicationCreateDto) {
+        UUID activityId = actId;
         UUID alumniId = activityApplicationCreateDto.alumniId();
 
         if (!activityRepository.existsById(activityId)) {
@@ -45,26 +43,40 @@ public class ActivityApplicationController {
         }
 
         ActivityApplication application = activityApplicationMapper.toEntity(activityApplicationCreateDto);
+        // 设置复合主键
+        ActivityAlumniId id = new ActivityAlumniId();
+        id.setActivityId(activityId);
+        id.setAlumniId(alumniId);
+        application.setId(id);
+        
         application.setApplyTime(LocalDateTime.now());
         activityApplicationRepository.save(application);
         return ResponseEntity.status(HttpStatus.CREATED).body("已提交申请");
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ActivityApplication> getById(@PathVariable UUID id) {
+    }    @GetMapping("/{appId}")
+    public ResponseEntity<ActivityApplication> getById(@PathVariable UUID actId, 
+                                                      @PathVariable UUID appId) {
+        ActivityAlumniId id = new ActivityAlumniId();
+        id.setActivityId(actId);
+        id.setAlumniId(appId);
+        
         Optional<ActivityApplication> application = activityApplicationRepository.findById(id);
         return application.map(ResponseEntity::ok)
                          .orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping
-    public ResponseEntity<List<ActivityApplication>> getAll() {
-        List<ActivityApplication> applications = activityApplicationRepository.findAll();
+    }@GetMapping
+    public ResponseEntity<List<ActivityApplication>> getAll(@PathVariable UUID actId) {
+        List<ActivityApplication> applications = activityApplicationRepository.findAll()
+                .stream()
+                .filter(app -> app.getId().getActivityId().equals(actId))
+                .toList();
         return ResponseEntity.ok(applications);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<String> update(@PathVariable UUID id, @Valid @RequestBody ActivityApplicationUpdateDto activityApplicationUpdateDto) {
+    }    @PutMapping("/{appId}")
+    public ResponseEntity<String> update(@PathVariable UUID actId, 
+                                        @PathVariable UUID appId, 
+                                        @Valid @RequestBody ActivityApplicationUpdateDto activityApplicationUpdateDto) {
+        ActivityAlumniId id = new ActivityAlumniId();
+        id.setActivityId(actId);
+        id.setAlumniId(appId);
+        
         var application = activityApplicationRepository.findById(id);
         if (application.isEmpty()) {
             return ResponseEntity.badRequest().body("id为 %s 的申请不存在！".formatted(id));
@@ -74,22 +86,27 @@ public class ActivityApplicationController {
         activityApplicationMapper.partialUpdate(activityApplicationUpdateDto, existingApplication);
         activityApplicationRepository.save(existingApplication);
         return ResponseEntity.ok("申请信息修改成功！");
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable UUID id) {
+    }    @DeleteMapping("/{appId}")
+    public ResponseEntity<String> delete(@PathVariable UUID actId, @PathVariable UUID appId) {
+        ActivityAlumniId id = new ActivityAlumniId();
+        id.setActivityId(actId);
+        id.setAlumniId(appId);
+        
         if (!activityApplicationRepository.existsById(id)) {
             return ResponseEntity.badRequest().body("id为 %s 的申请不存在！".formatted(id));
         }
 
         activityApplicationRepository.deleteById(id);
         return ResponseEntity.ok("申请删除成功！");
-    }
-
-    // 申请分组查询
+    }    // 申请分组查询
     @PostMapping("/filter")
-    public List<ActivityApplication> filter(@RequestBody ActivityApplicationFilterDto activityApplicationFilterDto) {
-        return filterService.filterActivityApplication(activityApplicationFilterDto);
+    public List<ActivityApplication> filter(@PathVariable UUID actId, 
+                                           @RequestBody ActivityApplicationFilterDto activityApplicationFilterDto) {
+        // 先获取该活动的所有申请，然后应用过滤条件
+        return activityApplicationService.findByFilter(activityApplicationFilterDto)
+                .stream()
+                .filter(app -> app.getId().getActivityId().equals(actId))
+                .toList();
     }
 }
 

@@ -5,28 +5,23 @@ import org.airo.asmp.dto.entity.AlumniCreateDto;
 import org.airo.asmp.dto.entity.AlumniFilterDto;
 import org.airo.asmp.dto.entity.AlumniUpdateDto;
 import org.airo.asmp.mapper.entity.AlumniMapper;
-import org.airo.asmp.model.Admin;
 import org.airo.asmp.model.entity.Alumni;
-import org.airo.asmp.repository.AdminRepository;
 import org.airo.asmp.repository.entity.AlumniRepository;
-import org.airo.asmp.service.FilterService;
-import org.springdoc.core.annotations.ParameterObject;
+import org.airo.asmp.service.AlumniService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/alumni")
 @RequiredArgsConstructor
 public class AlumniController {
-    private final AdminRepository adminRepository;
     private final AlumniRepository alumniRepository;
     private final AlumniMapper alumniMapper;
-    private final FilterService filterService;
+    private final AlumniService alumniService;
 
     //校友注册
     @PostMapping
@@ -83,7 +78,7 @@ public class AlumniController {
     // 校友分组查询
     @PostMapping("/filter")
     public List<Alumni> filter(@RequestBody AlumniFilterDto alumniFilterDto) {
-        return filterService.filterAlumni(alumniFilterDto);
+        return alumniService.findByFilter(alumniFilterDto);
     }
 }
 

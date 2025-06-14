@@ -1,10 +1,12 @@
 package org.airo.asmp.service;
 
 import lombok.RequiredArgsConstructor;
+import org.airo.asmp.dto.activity.ActivityFilterDto;
 import org.airo.asmp.dto.activity.ActivityStatusCountDto;
 import org.airo.asmp.model.activity.Activity;
 import org.airo.asmp.model.activity.Status;
 import org.airo.asmp.repository.ActivityRepository;
+import org.airo.asmp.util.SpecificationBuilder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 public class ActivityService {
     
     private final ActivityRepository activityRepository;
+    private final AlumniService alumniService;
     
     /**
      * 获取所有活动按状态分组的统计
@@ -66,5 +69,41 @@ public class ActivityService {
         return activityRepository.findAll().stream()
                 .filter(activity -> activity.getStatus() == status)
                 .toList();
+    }
+    
+    /**
+     * 活动过滤查询
+     */
+    public List<Activity> findByFilter(ActivityFilterDto filterDto) {
+        if (filterDto == null) {
+            return activityRepository.findAll();
+        }
+        
+        var organizers = filterDto.organizerFilter() != null ? 
+            alumniService.findByFilter(filterDto.organizerFilter()) : null;
+            
+        List<Activity> filteredActivities = activityRepository.findAll((root, query, builder) ->
+            SpecificationBuilder.of(root, builder)
+                    .like("title", filterDto.title())
+                    .like("description", filterDto.description())
+                    .dateTimeAfterOrEqual("startTime", filterDto.startTimeBegin())
+                    .dateTimeBefore("startTime", filterDto.startTimeEnd())
+                    .dateTimeAfterOrEqual("endTime", filterDto.endTimeBegin())
+                    .dateTimeBefore("endTime", filterDto.endTimeEnd())
+                    .like("location", filterDto.location())
+                    .equal("maxParticipants", filterDto.maxParticipants())
+                    .in("organizer", organizers)
+                    .likeRelatedField("organizer", "name", filterDto.organizerName())
+                    .build()
+        );
+        
+        // 如果指定了状态过滤，在服务层进行过滤
+        if (filterDto.status() != null) {
+            return filteredActivities.stream()
+                    .filter(activity -> activity.getStatus() == filterDto.status())
+                    .toList();
+        }
+        
+        return filteredActivities;
     }
 }

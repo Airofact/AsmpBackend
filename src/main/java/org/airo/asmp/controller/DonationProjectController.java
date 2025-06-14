@@ -1,12 +1,14 @@
 package org.airo.asmp.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.airo.asmp.dto.donation.DonationFilterDto;
 import org.airo.asmp.dto.donation.DonationProjectCreateDto;
 import org.airo.asmp.dto.donation.DonationProjectFilterDto;
 import org.airo.asmp.dto.donation.DonationProjectUpdateDto;
+import org.airo.asmp.model.donation.Donation;
 import org.airo.asmp.model.donation.DonationProject;
 import org.airo.asmp.service.DonationProjectService;
-import org.airo.asmp.service.FilterService;
+import org.airo.asmp.service.DonationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +19,12 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/donation-projects")
+@RequestMapping("/api/donation-project")
 @RequiredArgsConstructor
 public class DonationProjectController {
     
     private final DonationProjectService donationProjectService;
-    private final FilterService filterService;
+    private final DonationService donationService;
 
     /**
      * 创建捐赠项目
@@ -83,10 +85,9 @@ public class DonationProjectController {
     }
       /**
      * 根据条件查询项目
-     */
-    @PostMapping("/filter")
+     */    @PostMapping("/filter")
     public ResponseEntity<List<DonationProject>> searchProjects(@RequestBody DonationProjectFilterDto filter) {
-        List<DonationProject> projects = filterService.filterDonationProject(filter);
+        List<DonationProject> projects = donationProjectService.findByFilter(filter);
         return ResponseEntity.ok(projects);
     }
     
@@ -215,8 +216,7 @@ public class DonationProjectController {
                 })
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
-    
-    /**
+      /**
      * 项目进度信息DTO
      */
     public record ProjectProgressInfo(
@@ -225,4 +225,25 @@ public class DonationProjectController {
             Double progressPercentage,
             Boolean targetReached
     ) {}
+    
+    // ===== 全局捐赠相关端点 =====
+    
+    /**
+     * 获取所有捐赠（不限特定项目）
+     */
+    @GetMapping("/donation")
+    public ResponseEntity<List<Donation>> getAllDonations() {
+        List<Donation> donations = donationService.findAll();
+        return ResponseEntity.ok(donations);
+    }
+    
+    /**
+     * 捐赠过滤查询（不限特定项目）
+     */
+    @PostMapping("/donation/filter")
+    public ResponseEntity<List<Donation>> filterDonations(
+            @RequestBody DonationFilterDto filterDto) {
+        List<Donation> donations = donationService.findByFilter(filterDto);
+        return ResponseEntity.ok(donations);
+    }
 }

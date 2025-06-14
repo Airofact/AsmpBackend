@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * DTO for filtering {@link org.airo.asmp.model.entity.BusinessEntity}
@@ -15,8 +14,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BusinessEntityFilterDto {
-    public UUID id;
-    public UUID addedById;
     public LocalDateTime addedAtBegin;
     public LocalDateTime addedAtEnd;
 }

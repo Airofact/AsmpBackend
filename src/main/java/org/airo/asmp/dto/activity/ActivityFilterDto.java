@@ -4,7 +4,6 @@ import org.airo.asmp.dto.entity.AlumniFilterDto;
 import org.airo.asmp.model.activity.Status;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * DTO for filtering {@link org.airo.asmp.model.activity.Activity}

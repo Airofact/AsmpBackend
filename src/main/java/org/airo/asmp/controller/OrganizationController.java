@@ -3,15 +3,16 @@ package org.airo.asmp.controller;
 import lombok.RequiredArgsConstructor;
 import org.airo.asmp.dto.entity.OrganizationCreateDto;
 import org.airo.asmp.dto.entity.OrganizationFilterDto;
+import org.airo.asmp.dto.entity.OrganizationMemberFilterDto;
 import org.airo.asmp.dto.entity.OrganizationUpdateDto;
 import org.airo.asmp.mapper.entity.OrganizationMapper;
 import org.airo.asmp.model.entity.Alumni;
 import org.airo.asmp.model.entity.Organization;
-import org.airo.asmp.repository.AdminRepository;
+import org.airo.asmp.model.entity.OrganizationMember;
 import org.airo.asmp.repository.entity.AlumniRepository;
 import org.airo.asmp.repository.entity.OrganizationRepository;
-import org.airo.asmp.service.FilterService;
-import org.springdoc.core.annotations.ParameterObject;
+import org.airo.asmp.service.OrganizationMemberService;
+import org.airo.asmp.service.OrganizationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -23,11 +24,11 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/organization")
 @RequiredArgsConstructor
-public class OrganizationController {
+public class OrganizationController {	
 	private final OrganizationRepository organizationRepository;
 	private final AlumniRepository alumniRepository;
-	private final AdminRepository adminRepository;
-	private final FilterService filterService;
+	private final OrganizationService organizationService;
+	private final OrganizationMemberService organizationMemberService;
 	private final OrganizationMapper organizationMapper;
 
 	// 组织注册
@@ -87,10 +88,30 @@ public class OrganizationController {
 	@GetMapping("/search")
 	public List<Organization> searchByName(@RequestParam("name") String name){
 		return organizationRepository.findByName(name);
-	}
-	// 组织分组查询
+	}	// 组织分组查询
 	@PostMapping("/filter")
 	public List<Organization> filter(@RequestBody OrganizationFilterDto organizationFilterDto) {
-		return filterService.filterOrganization(organizationFilterDto);
+		return organizationService.findByFilter(organizationFilterDto);
+	}
+	
+	// ===== 全局组织成员相关端点 =====
+	
+	/**
+	 * 获取所有组织成员（不限组织）
+	 */
+	@GetMapping("/member")
+	public ResponseEntity<List<OrganizationMember>> getAllMembers() {
+		List<OrganizationMember> members = organizationMemberService.getAllMembers();
+		return ResponseEntity.ok(members);
+	}
+	
+	/**
+	 * 全局组织成员过滤查询（不限组织）
+	 */
+	@PostMapping("/member/filter")
+	public ResponseEntity<List<OrganizationMember>> filterMembers(
+			@RequestBody OrganizationMemberFilterDto filterDto) {
+		List<OrganizationMember> members = organizationMemberService.findAllByFilter(filterDto);
+		return ResponseEntity.ok(members);
 	}
 }

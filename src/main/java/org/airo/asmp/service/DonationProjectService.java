@@ -3,11 +3,13 @@ package org.airo.asmp.service;
 import lombok.RequiredArgsConstructor;
 import org.airo.asmp.dto.donation.DonationProjectCreateDto;
 import org.airo.asmp.dto.donation.DonationProjectUpdateDto;
+import org.airo.asmp.dto.donation.DonationProjectFilterDto;
 import org.airo.asmp.mapper.DonationProjectMapper;
 import org.airo.asmp.model.entity.BusinessEntity;
 import org.airo.asmp.model.donation.DonationProject;
 import org.airo.asmp.repository.entity.BusinessEntityRepository;
 import org.airo.asmp.repository.DonationProjectRepository;
+import org.airo.asmp.util.SpecificationBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,7 @@ public class DonationProjectService {
     private final DonationProjectRepository donationProjectRepository;
     private final BusinessEntityRepository<BusinessEntity> businessEntityRepository;
     private final DonationProjectMapper donationProjectMapper;
+    private final BusinessEntityService businessEntityService;
     
     /**
      * 创建捐赠项目
@@ -206,4 +209,35 @@ public class DonationProjectService {
         // 检查结束时间
 		return project.getEndDate() == null || !project.getEndDate().isBefore(LocalDateTime.now());
 	}
+	
+	/**
+     * 根据过滤条件查询捐赠项目
+     */
+    public List<DonationProject> findByFilter(DonationProjectFilterDto filter) {
+        if (filter == null) {
+            return findAll();
+        }
+        
+        var organizers = filter.organizerFilter() != null ? 
+            businessEntityService.findByFilter(filter.organizerFilter()) : null;
+            
+        return donationProjectRepository.findAll((root, query, builder) ->
+                SpecificationBuilder.of(root, builder)
+                        .in("organizer", organizers)
+                        .like("name", filter.name())
+                        .like("description", filter.description())
+                        .greaterThanOrEqualTo("targetAmount", filter.minTargetAmount())
+                        .lessThanOrEqualTo("targetAmount", filter.maxTargetAmount())
+                        .greaterThanOrEqualTo("currentAmount", filter.minCurrentAmount())
+                        .lessThanOrEqualTo("currentAmount", filter.maxCurrentAmount())
+                        .dateTimeAfterOrEqual("startDate", filter.startDateFrom())
+                        .dateTimeBefore("startDate", filter.startDateTo())
+                        .dateTimeAfterOrEqual("endDate", filter.endDateFrom())
+                        .dateTimeBefore("endDate", filter.endDateTo())
+                        .equal("status", filter.status())
+                        .like("category", filter.category())
+                        .equal("targetReached", filter.targetReached())
+                        .build()
+        );
+    }
 }

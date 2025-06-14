@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.airo.asmp.dto.donation.DonationFilterDto;
+import org.airo.asmp.util.SpecificationBuilder;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,8 @@ public class DonationService {
     private final DonationProjectRepository donationProjectRepository;
     private final BusinessEntityRepository<BusinessEntity> businessEntityRepository;
     private final DonationMapper donationMapper;
+    private final AlumniService alumniService;
+    private final DonationProjectService donationProjectService;
     
     /**
      * 创建捐赠
@@ -210,5 +214,36 @@ public class DonationService {
         }
         
         donationProjectRepository.save(project);
+    }
+    
+    /**
+     * 根据过滤条件查询捐赠
+     */
+    public List<Donation> findByFilter(DonationFilterDto filter) {
+        if (filter == null) {
+            return findAll();
+        }
+        
+        var donors = filter.donorFilter() != null ? 
+            alumniService.findByFilter(filter.donorFilter()) : null;
+        var donationProjects = filter.donationProjectFilter() != null ? 
+            donationProjectService.findByFilter(filter.donationProjectFilter()) : null;
+            
+        return donationRepository.findAll((root, query, builder) ->
+            SpecificationBuilder.of(root, builder)
+                    .in("donor", donors)
+                    .in("project", donationProjects)
+                    .greaterThanOrEqualTo("amount", filter.minAmount())
+                    .lessThanOrEqualTo("amount", filter.maxAmount())
+                    .equal("paymentMethod", filter.paymentMethod())
+                    .dateTimeAfterOrEqual("donateTime", filter.donateTimeFrom())
+                    .dateTimeBefore("donateTime", filter.donateTimeTo())
+                    .equal("status", filter.status())
+                    .equal("anonymous", filter.anonymous())
+                    .like("transactionId", filter.transactionId())
+                    .dateTimeAfterOrEqual("createdAt", filter.createdAtFrom())
+                    .dateTimeBefore("createdAt", filter.createdAtTo())
+                    .build()
+        );
     }
 }

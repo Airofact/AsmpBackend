@@ -5,13 +5,11 @@ import org.airo.asmp.dto.entity.EnterpriseCreateDto;
 import org.airo.asmp.dto.entity.EnterpriseFilterDto;
 import org.airo.asmp.dto.entity.EnterpriseUpdateDto;
 import org.airo.asmp.mapper.entity.EnterpriseMapper;
-import org.airo.asmp.model.Admin;
 import org.airo.asmp.model.entity.Enterprise;
-import org.airo.asmp.repository.AdminRepository;
 import org.airo.asmp.repository.entity.EnterpriseRepository;
-import org.airo.asmp.service.FilterService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.airo.asmp.service.EnterpriseService;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,8 +21,7 @@ import java.util.UUID;
 public class EnterpriseController {
 	private final EnterpriseRepository enterpriseRepository;
 	private final EnterpriseMapper enterpriseMapper;
-	private final AdminRepository adminRepository;
-	private final FilterService filterService;
+	private final EnterpriseService enterpriseService;
 
 	@PostMapping
 	public void add(@RequestBody EnterpriseCreateDto enterpriseDto) {
@@ -69,7 +66,7 @@ public class EnterpriseController {
 	public List<Enterprise> filter(
 			@RequestBody EnterpriseFilterDto filterDto
 	) {
-		return filterService.filterEnterprise(filterDto);
+		return enterpriseService.findByFilter(filterDto);
 	}
 
 }

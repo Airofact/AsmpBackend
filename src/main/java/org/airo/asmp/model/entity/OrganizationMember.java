@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class OrganizationMember {
     @EmbeddedId
     private OrganizationAlumniId id;
+
     @ManyToOne
     @MapsId("organizationId")
     @JoinColumn(name = "organization_id", nullable = false)

@@ -7,8 +7,14 @@ import org.mapstruct.*;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface OrganizationMemberMapper {
+    
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "organization", ignore = true)
+    @Mapping(target = "alumni", ignore = true)
+    @Mapping(target = "joinTime", ignore = true)
     OrganizationMember toEntity(OrganizationMemberCreateDto dto);
 
+    @Mapping(source = "alumni.id", target = "alumniId")
     OrganizationMemberCreateDto toDto(OrganizationMember entity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

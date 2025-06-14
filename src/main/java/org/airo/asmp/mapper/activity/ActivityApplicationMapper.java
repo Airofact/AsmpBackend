@@ -7,16 +7,16 @@ import org.mapstruct.*;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ActivityApplicationMapper {
-    @Mapping(source = "activityId", target = "activity.id")
-    @Mapping(source = "alumniId", target = "alumni.id")
+    
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "activity", ignore = true)
+    @Mapping(target = "alumni", ignore = true)
+    @Mapping(target = "applyTime", ignore = true)
     ActivityApplication toEntity(ActivityApplicationCreateDto dto);
 
-    @Mapping(source = "activity.id", target = "activityId")
     @Mapping(source = "alumni.id", target = "alumniId")
     ActivityApplicationCreateDto toDto(ActivityApplication entity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(source = "activityId", target = "activity.id")
-    @Mapping(source = "alumniId", target = "alumni.id")
     void partialUpdate(ActivityApplicationUpdateDto dto, @MappingTarget ActivityApplication entity);
 }

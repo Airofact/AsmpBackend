@@ -6,9 +6,8 @@ import org.airo.asmp.dto.NoticeFilterDto;
 import org.airo.asmp.dto.NoticeUpdateDto;
 import org.airo.asmp.mapper.NoticeMapper;
 import org.airo.asmp.model.notice.Notice;
+import org.airo.asmp.service.NoticeService;
 import org.airo.asmp.repository.NoticeRepository;
-import org.airo.asmp.service.FilterService;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -23,7 +22,7 @@ import java.util.UUID;
 public class NoticeController {
     private final NoticeRepository noticeRepository;
     private final NoticeMapper noticeMapper;
-    private final FilterService filterService;
+    private final NoticeService noticeService;
 
     // 通知注册
     @PostMapping
@@ -70,6 +69,6 @@ public class NoticeController {
     }    // 通知分组查询
     @PostMapping("/filter")
     public List<Notice> filter(@RequestBody NoticeFilterDto noticeFilterDto) {
-        return filterService.filterNotice(noticeFilterDto);
+        return noticeService.findByFilter(noticeFilterDto);
     }
 }

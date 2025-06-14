@@ -3,7 +3,6 @@ package org.airo.asmp.dto.job;
 import org.airo.asmp.dto.entity.EnterpriseFilterDto;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * 职位筛选DTO

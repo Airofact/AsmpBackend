@@ -1,7 +1,6 @@
 package org.airo.asmp.dto.entity;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 /**
  * DTO for {@link org.airo.asmp.model.entity.Enterprise}

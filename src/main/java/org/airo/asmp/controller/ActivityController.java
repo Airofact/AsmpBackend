@@ -1,6 +1,7 @@
 package org.airo.asmp.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.airo.asmp.dto.activity.ActivityApplicationFilterDto;
 import org.airo.asmp.dto.activity.ActivityCreateDto;
 import org.airo.asmp.dto.activity.ActivityFilterDto;
 import org.airo.asmp.dto.activity.ActivityStatusCountDto;
@@ -8,13 +9,13 @@ import org.airo.asmp.dto.activity.ActivityTimeRangeDto;
 import org.airo.asmp.dto.activity.ActivityUpdateDto;
 import org.airo.asmp.mapper.activity.ActivityMapper;
 import org.airo.asmp.model.activity.Activity;
+import org.airo.asmp.model.activity.ActivityApplication;
 import org.airo.asmp.model.activity.Status;
 import org.airo.asmp.model.entity.Organization;
 import org.airo.asmp.repository.ActivityRepository;
 import org.airo.asmp.repository.entity.OrganizationRepository;
+import org.airo.asmp.service.ActivityApplicationService;
 import org.airo.asmp.service.ActivityService;
-import org.airo.asmp.service.FilterService;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -32,7 +33,7 @@ public class ActivityController {
     private final OrganizationRepository organizationRepository;
     private final ActivityMapper activityMapper;
     private final ActivityService activityService;
-    private final FilterService filterService;
+    private final ActivityApplicationService activityApplicationService;
 
     // 活动注册
     @PostMapping
@@ -97,7 +98,7 @@ public class ActivityController {
     // 活动分组查询（包含状态过滤）
     @PostMapping("/filter")
     public List<Activity> filter(@RequestBody ActivityFilterDto activityFilterDto) {
-        return filterService.filterActivity(activityFilterDto);
+        return activityService.findByFilter(activityFilterDto);
     }
 
     @GetMapping("/statusCount")
@@ -124,8 +125,7 @@ public class ActivityController {
     public List<Activity> getActivitiesByTitle(@RequestParam("title") String title) {
         return activityRepository.findByTitleContaining(title);
     }
-    
-    // 根据status查询活动
+      // 根据status查询活动
     @GetMapping("/byStatus")
     public List<Activity> getActivitiesByStatus(@RequestParam("status") String status) {
         try {
@@ -134,6 +134,27 @@ public class ActivityController {
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("无效的状态值: " + status);
         }
+    }
+    
+    // ===== 全局活动申请相关端点 =====
+    
+    /**
+     * 获取所有活动申请（不限特定活动）
+     */
+    @GetMapping("/application")
+    public ResponseEntity<List<ActivityApplication>> getAllApplications() {
+        List<ActivityApplication> applications = activityApplicationService.findAll();
+        return ResponseEntity.ok(applications);
+    }
+    
+    /**
+     * 活动申请过滤查询（不限特定活动）
+     */
+    @PostMapping("/application/filter")
+    public ResponseEntity<List<ActivityApplication>> filterApplications(
+            @RequestBody ActivityApplicationFilterDto filterDto) {
+        List<ActivityApplication> applications = activityApplicationService.findByFilter(filterDto);
+        return ResponseEntity.ok(applications);
     }
 }
 
