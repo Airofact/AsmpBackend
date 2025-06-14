@@ -1,9 +1,11 @@
 package org.airo.asmp.service;
 
 import lombok.RequiredArgsConstructor;
+import org.airo.asmp.dto.activity.ActivityApplicationFilterDto;
 import org.airo.asmp.dto.activity.ActivityFilterDto;
 import org.airo.asmp.dto.activity.ActivityStatusCountDto;
 import org.airo.asmp.model.activity.Activity;
+import org.airo.asmp.model.activity.ActivityApplication;
 import org.airo.asmp.model.activity.Status;
 import org.airo.asmp.repository.ActivityRepository;
 import org.airo.asmp.util.OptionalSpecificationBuilder;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,7 +23,7 @@ public class ActivityService {
     
     private final ActivityRepository activityRepository;
     private final AlumniService alumniService;
-    
+
     /**
      * 获取所有活动按状态分组的统计
      */

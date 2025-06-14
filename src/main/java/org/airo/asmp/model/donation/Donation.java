@@ -24,13 +24,13 @@ public class Donation {
     private UUID id;
     
     // 捐赠者 - 可以是校友、企业或其他BusinessEntity
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "donor_id", nullable = false)
     @NotNull
     private BusinessEntity donor;
     
     // 捐赠项目
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "project_id", nullable = false)
     @NotNull
     private DonationProject project;

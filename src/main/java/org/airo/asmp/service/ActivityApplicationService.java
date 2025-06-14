@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.airo.asmp.dto.activity.ActivityApplicationFilterDto;
 import org.airo.asmp.model.activity.ActivityAlumniId;
 import org.airo.asmp.model.activity.ActivityApplication;
+import org.airo.asmp.model.entity.Alumni;
 import org.airo.asmp.repository.ActivityApplicationRepository;
 import org.airo.asmp.util.OptionalSpecificationBuilder;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +28,18 @@ public class ActivityApplicationService {
      */
     public Optional<ActivityApplication> findById(ActivityAlumniId id) {
         return activityApplicationRepository.findById(id);
+    }
+
+    public List<ActivityApplication> findByActivityId(UUID activityId) {
+        return activityApplicationRepository.findAll((root, query, builder) ->
+                root.get("activity").get("id").in(activityId)
+        );
+    }
+
+    public List<ActivityApplication> findByAlumniId(UUID alumniId) {
+        return activityApplicationRepository.findAll((root, query, builder) ->
+                root.get("alumni").get("id").in(alumniId)
+        );
     }
     
     /**
@@ -57,5 +71,28 @@ public class ActivityApplicationService {
                     .equal("signedIn", filterDto.signedIn())
                     .build()
         );
+    }
+
+    public List<ActivityApplication> findSignedIn(UUID activityId) {
+        return activityApplicationRepository.findAll((root, query, builder) ->
+                builder.and(
+                        root.get("activity").get("id").in(activityId),
+                        builder.isTrue(root.get("signedIn"))
+                )
+        );
+    }
+
+    public List<Alumni> getParticipants(UUID activityId) {
+        return activityApplicationRepository.findAll((root, query, builder) ->
+                root.get("activity").get("id").in(activityId)
+        ).stream()
+          .map(ActivityApplication::getAlumni)
+          .toList();
+    }
+
+    public Double getParticipateRate (UUID actId) {
+        List<Alumni> participants = getParticipants(actId);
+        var signedInCount = findSignedIn(actId).size();
+        return participants.isEmpty() ? 0.0 : (double) signedInCount / participants.size();
     }
 }

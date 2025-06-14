@@ -13,7 +13,7 @@ public class Organization extends BusinessEntity{
     String name;
 
     @Column(nullable = false)
-    Type type =Type.INTEREST;
+    Type type = Type.INTEREST;
 
     @Column(columnDefinition = "text")
     String description;

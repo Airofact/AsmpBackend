@@ -43,8 +43,7 @@ public class DonationProject {
     
     @Column
     private LocalDateTime endDate;
-    
-    @Enumerated(EnumType.STRING)
+
     @Column(nullable = false)
     private ProjectStatus status = ProjectStatus.ACTIVE;
     
@@ -55,7 +54,7 @@ public class DonationProject {
     private String imageUrl;
     
     // 项目发起者 - 可以是组织或其他业务实体
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "organizer_id")
     private BusinessEntity organizer;
     

@@ -11,6 +11,7 @@ import org.airo.asmp.mapper.activity.ActivityMapper;
 import org.airo.asmp.model.activity.Activity;
 import org.airo.asmp.model.activity.ActivityApplication;
 import org.airo.asmp.model.activity.Status;
+import org.airo.asmp.model.entity.Alumni;
 import org.airo.asmp.model.entity.Organization;
 import org.airo.asmp.repository.ActivityRepository;
 import org.airo.asmp.repository.entity.OrganizationRepository;
@@ -68,7 +69,9 @@ public class ActivityController {
         activityMapper.partialUpdate(activityUpdateDto, existingActivity);
         Activity updatedActivity = activityRepository.save(existingActivity);
         return ResponseEntity.ok(updatedActivity);
-    }    @DeleteMapping("/{id}")
+    }
+
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         Optional<Activity> optionalActivity = activityRepository.findById(id);
         if (optionalActivity.isEmpty()) {
@@ -108,7 +111,9 @@ public class ActivityController {
     @GetMapping("/statusCount")
     public List<ActivityStatusCountDto> getActivityCountByStatus() {
         return activityService.getActivityCountByStatus();
-    }    // 1. 查询活动列表（时间段）
+    }
+
+    // 1. 查询活动列表（时间段）
     @PostMapping("/query/timeRange")
     public List<Activity> queryByTimeRange(@RequestBody ActivityTimeRangeDto dto) {
         return activityService.getActivitiesInTimeRange(dto.start(), dto.end());
@@ -124,7 +129,9 @@ public class ActivityController {
     @GetMapping("/byOrganizer/{organizerId}")
     public List<Activity> getActivitiesByOrganizer(@PathVariable("organizerId") UUID organizerId) {
         return activityRepository.findByOrganizerId(organizerId);
-    }    // 根据title查询
+    }
+
+    // 根据title查询
     @GetMapping("/byTitle")
     public List<Activity> getActivitiesByTitle(@RequestParam("title") String title) {
         return activityRepository.findByTitleContaining(title);
@@ -138,6 +145,16 @@ public class ActivityController {
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("无效的状态值: " + status);
         }
+    }
+
+    @GetMapping("/{id}/participants")
+    public ResponseEntity<List<Alumni>> getParticipants(@PathVariable UUID id) {
+        return ResponseEntity.ok(activityApplicationService.getParticipants(id));
+    }
+
+    @GetMapping("/{id}/participate-rate")
+    public ResponseEntity<Double> getParticipateRate(@PathVariable UUID id) {
+        return ResponseEntity.ok(activityApplicationService.getParticipateRate(id));
     }
     
     // ===== 全局活动申请相关端点 =====
