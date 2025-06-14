@@ -47,12 +47,10 @@ public class NoticeController {
         if (!noticeRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        try {
+
             noticeRepository.deleteById(id);
             return ResponseEntity.noContent().build();
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
+
     }
 
     // 根据ID查询通知

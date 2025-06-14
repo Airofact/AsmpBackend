@@ -32,12 +32,10 @@ public class DonationProjectController {
      */
     @PostMapping
     public ResponseEntity<DonationProject> createProject(@Valid @RequestBody DonationProjectCreateDto createDto) {
-        try {
+
             DonationProject project = donationProjectService.createProject(createDto);
             return new ResponseEntity<>(project, HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+
     }
     
     /**
@@ -46,26 +44,19 @@ public class DonationProjectController {
     @PutMapping("/{id}")
     public ResponseEntity<DonationProject> updateProject(@PathVariable UUID id, 
                                                         @Valid @RequestBody DonationProjectUpdateDto updateDto) {
-        try {
+
             DonationProject project = donationProjectService.updateProject(id, updateDto);
             return ResponseEntity.ok(project);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
     }
       /**
      * 删除捐赠项目
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable UUID id) {
-        try {
+
             donationProjectService.deleteProject(id);
             return ResponseEntity.noContent().build();
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+
     }
     
     /**
@@ -143,36 +134,30 @@ public class DonationProjectController {
      */
     @PostMapping("/{id}/close")
     public ResponseEntity<DonationProject> closeProject(@PathVariable UUID id) {
-        try {
+
             DonationProject project = donationProjectService.closeProject(id);
             return ResponseEntity.ok(project);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+
     }
     
     /**
      * 暂停项目
      */
     @PostMapping("/{id}/suspend")
-    public ResponseEntity<DonationProject> suspendProject(@PathVariable UUID id) {        try {
+    public ResponseEntity<DonationProject> suspendProject(@PathVariable UUID id) {
             DonationProject project = donationProjectService.suspendProject(id);
             return ResponseEntity.ok(project);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+
     }
     
     /**
      * 完成项目
      */
     @PostMapping("/{id}/complete")
-    public ResponseEntity<DonationProject> completeProject(@PathVariable UUID id) {        try {
+    public ResponseEntity<DonationProject> completeProject(@PathVariable UUID id) {
             DonationProject project = donationProjectService.completeProject(id);
             return ResponseEntity.ok(project);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+
     }
     
     /**
@@ -180,12 +165,10 @@ public class DonationProjectController {
      */
     @GetMapping("/{id}/can-donate")
     public ResponseEntity<Boolean> canAcceptDonation(@PathVariable UUID id) {
-        try {
+
             boolean canDonate = donationProjectService.canAcceptDonation(id);
             return ResponseEntity.ok(canDonate);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
-        }
+
     }
     
     /**
@@ -193,12 +176,10 @@ public class DonationProjectController {
      */
     @PutMapping("/{id}/amount")
     public ResponseEntity<DonationProject> updateCurrentAmount(@PathVariable UUID id, 
-                                                              @RequestParam BigDecimal amount) {        try {
+                                                              @RequestParam BigDecimal amount) {
             DonationProject project = donationProjectService.updateCurrentAmount(id, amount);
             return ResponseEntity.ok(project);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+
     }
     
     /**

@@ -28,7 +28,6 @@ public class JobApplication {
     @Column
     LocalDateTime applyTime; 
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     ApplicationStatus status = ApplicationStatus.PENDING;
 

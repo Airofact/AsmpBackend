@@ -8,5 +8,6 @@ import java.util.UUID;
 
 public record OrganizationCreateDto(String name,
         String type,
+        String state,
         String description,
         UUID creatorId) {}

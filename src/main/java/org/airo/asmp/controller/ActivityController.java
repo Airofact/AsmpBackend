@@ -81,12 +81,10 @@ public class ActivityController {
         if (LocalDateTime.now().isAfter(activity.getStartTime())) {
             return ResponseEntity.badRequest().build();
         }
-        try {
+
             activityRepository.deleteById(id);
             return ResponseEntity.noContent().build();
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
+
     }
 
     // 根据ID查询活动
@@ -139,12 +137,10 @@ public class ActivityController {
       // 根据status查询活动
     @GetMapping("/byStatus")
     public List<Activity> getActivitiesByStatus(@RequestParam("status") String status) {
-        try {
+
             Status statusEnum = Status.valueOf(status);
             return activityService.getActivitiesByStatus(statusEnum);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("无效的状态值: " + status);
-        }
+
     }
 
     @GetMapping("/{id}/participants")

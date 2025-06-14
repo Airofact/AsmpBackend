@@ -48,12 +48,10 @@ public class AlumniController {
         if (!alumniRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        try {
+
             alumniRepository.deleteById(id);
             return ResponseEntity.noContent().build();
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
+
     }
 
     @GetMapping("/{id}")

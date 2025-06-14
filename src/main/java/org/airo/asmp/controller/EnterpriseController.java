@@ -46,12 +46,10 @@ public class EnterpriseController {
 		if (!enterpriseRepository.existsById(id)) {
 			return ResponseEntity.notFound().build();
 		}
-		try {
+
 			enterpriseRepository.deleteById(id);
 			return ResponseEntity.noContent().build();
-		} catch (DataIntegrityViolationException e) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).build();
-		}
+
 	}
 
 	@GetMapping("/{id}")

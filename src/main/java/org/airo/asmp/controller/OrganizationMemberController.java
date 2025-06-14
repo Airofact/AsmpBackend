@@ -33,12 +33,9 @@ public class OrganizationMemberController {
         if (organizationMemberService.isMember(orgId, createDto.alumniId())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-        try {
+
             OrganizationMember member = organizationMemberService.addMember(orgId, createDto);
             return new ResponseEntity<>(member, HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
     }
     
     /**
@@ -71,12 +68,9 @@ public class OrganizationMemberController {
     public ResponseEntity<OrganizationMember> updateMember(@PathVariable UUID orgId,
                                                           @PathVariable UUID memId,
                                                           @Valid @RequestBody OrganizationMemberUpdateDto updateDto) {
-        try {
+
             OrganizationMember member = organizationMemberService.updateMember(orgId, memId, updateDto);
             return ResponseEntity.ok(member);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
     }
     
     /**
@@ -86,12 +80,10 @@ public class OrganizationMemberController {
     @DeleteMapping("/{memId}")
     public ResponseEntity<Void> removeMember(@PathVariable UUID orgId,
                                            @PathVariable UUID memId) {
-        try {
+
             organizationMemberService.removeMember(orgId, memId);
             return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+
     }
     
     /**

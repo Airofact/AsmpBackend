@@ -18,4 +18,6 @@ public interface ActivityRepository extends JpaRepository<Activity, UUID>, JpaSp
     List<Activity> findByTitle(String title);
     
     List<Activity> findByTitleContaining(String title);
+
+    Activity getActivitiesById(UUID id);
 }

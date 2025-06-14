@@ -114,11 +114,9 @@ public class OrganizationService {
         if (!organizationRepository.existsById(id)) {
             throw new RuntimeException("Organization not found");
         }
-        try {
+
             organizationRepository.deleteById(id);
-        } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Cannot delete organization due to data integrity constraints", e);
-        }
+
     }
     
     /**

@@ -29,12 +29,10 @@ public class DonationController {
             @PathVariable UUID donProjId,
             @Valid @RequestBody DonationCreateDto createDto
     ) {
-        try {
+
             Donation donation = donationService.createDonation(donProjId, createDto);
             return new ResponseEntity<>(donation, HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+
     }
 
     /**
@@ -43,7 +41,7 @@ public class DonationController {
     @PutMapping("/{donId}")
     public ResponseEntity<Donation> updateDonation(@PathVariable UUID donProjId,
                                                   @PathVariable UUID donId, 
-                                                  @Valid @RequestBody DonationUpdateDto updateDto) {        try {
+                                                  @Valid @RequestBody DonationUpdateDto updateDto) {
             // 验证捐赠属于指定的项目
             Donation existingDonation = donationService.findById(donId)
                     .orElse(null);
@@ -53,14 +51,12 @@ public class DonationController {
             
             Donation donation = donationService.updateDonation(donId, updateDto);
             return ResponseEntity.ok(donation);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+
     }    /**
      * 删除捐赠
      */
     @DeleteMapping("/{donId}")
-    public ResponseEntity<Void> deleteDonation(@PathVariable UUID donProjId, @PathVariable UUID donId) {        try {
+    public ResponseEntity<Void> deleteDonation(@PathVariable UUID donProjId, @PathVariable UUID donId) {
             // 验证捐赠属于指定的项目
             Donation existingDonation = donationService.findById(donId)
                     .orElse(null);
@@ -70,11 +66,7 @@ public class DonationController {
             
             donationService.deleteDonation(donId);
             return ResponseEntity.noContent().build();
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+
     }
     
     /**
@@ -125,7 +117,7 @@ public class DonationController {
       /**
      * 确认捐赠
      */    @PostMapping("/{donId}/confirm")
-    public ResponseEntity<Donation> confirmDonation(@PathVariable UUID donProjId, @PathVariable UUID donId) {        try {
+    public ResponseEntity<Donation> confirmDonation(@PathVariable UUID donProjId, @PathVariable UUID donId) {
             // 验证捐赠属于指定的项目
             Donation existingDonation = donationService.findById(donId)
                     .orElse(null);
@@ -135,15 +127,13 @@ public class DonationController {
             
             Donation donation = donationService.confirmDonation(donId);
             return ResponseEntity.ok(donation);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+
     }
     
     /**
      * 完成捐赠
      */    @PostMapping("/{donId}/complete")
-    public ResponseEntity<Donation> completeDonation(@PathVariable UUID donProjId, @PathVariable UUID donId) {        try {
+    public ResponseEntity<Donation> completeDonation(@PathVariable UUID donProjId, @PathVariable UUID donId) {
             // 验证捐赠属于指定的项目
             Donation existingDonation = donationService.findById(donId)
                     .orElse(null);
@@ -153,9 +143,7 @@ public class DonationController {
             
             Donation donation = donationService.completeDonation(donId);
             return ResponseEntity.ok(donation);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+
     }      /**
      * 根据状态查询捐赠
      */

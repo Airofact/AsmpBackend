@@ -34,7 +34,7 @@ public class JobApplicationController {
             @PathVariable UUID jobId,
             @RequestBody JobApplicationCreateDto dto
     ) {
-        try {
+
             // 检查是否已经申请过
             var existing = jobApplicationRepository.findById(jobId)
                     .stream()
@@ -64,9 +64,6 @@ public class JobApplicationController {
             jobApplication.setStatus(JobApplication.ApplicationStatus.PENDING);
             JobApplication savedApplication = jobApplicationRepository.save(jobApplication);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedApplication);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
     }
 
     @PutMapping("/{appId}")
@@ -102,12 +99,9 @@ public class JobApplicationController {
             return ResponseEntity.badRequest().build();
         }
         
-        try {
+
             jobApplicationRepository.deleteById(appId);
             return ResponseEntity.noContent().build();
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
     }
 
     @GetMapping("/{appId}")

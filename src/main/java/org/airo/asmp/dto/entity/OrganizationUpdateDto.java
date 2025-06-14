@@ -7,5 +7,6 @@ package org.airo.asmp.dto.entity;
 public record OrganizationUpdateDto(
 		String name,
         String type,
-        String description
+        String description,
+		String state
 ) {}

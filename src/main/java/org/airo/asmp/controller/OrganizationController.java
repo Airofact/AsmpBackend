@@ -28,37 +28,24 @@ public class OrganizationController {
 	// 组织注册
 	@PostMapping
 	public ResponseEntity<Organization> add(@Valid @RequestBody OrganizationCreateDto organizationCreateDto) {
-		try {
+
 			Organization savedOrganization = organizationService.create(organizationCreateDto);
 			return ResponseEntity.status(HttpStatus.CREATED).body(savedOrganization);
-		} catch (RuntimeException e) {
-			return ResponseEntity.badRequest().build();
-		}
 	}
 
 	// 组织信息修改
 	@PutMapping("/{id}")
 	public ResponseEntity<Organization> update(@PathVariable UUID id, @Valid @RequestBody OrganizationUpdateDto organizationUpdateDto) {
-		try {
+
 			Organization updatedOrganization = organizationService.update(id, organizationUpdateDto);
 			return ResponseEntity.ok(updatedOrganization);
-		} catch (RuntimeException e) {
-			return ResponseEntity.notFound().build();
-		}
+
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> delete(@PathVariable UUID id) {
-		try {
 			organizationService.delete(id);
 			return ResponseEntity.noContent().build();
-		} catch (RuntimeException e) {
-			if (e.getMessage().contains("not found")) {
-				return ResponseEntity.notFound().build();
-			} else {
-				return ResponseEntity.status(HttpStatus.CONFLICT).build();
-			}
-		}
 	}
 
 	// 根据ID查询组织

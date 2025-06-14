@@ -49,12 +49,9 @@ public class JobPostController {
         if (!jobPostRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        try {
+
             jobPostRepository.deleteById(id);
             return ResponseEntity.noContent().build();
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
     }
 
     @GetMapping("/{id}")

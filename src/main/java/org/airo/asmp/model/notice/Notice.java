@@ -21,7 +21,6 @@ public class Notice {
     @Column(columnDefinition = "text")
     String content;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     Type type;
 

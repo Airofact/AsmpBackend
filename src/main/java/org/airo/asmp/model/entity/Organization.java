@@ -22,9 +22,16 @@ public class Organization extends BusinessEntity{
     @JoinColumn(name = "creator_id", nullable = false)
     Alumni creator;
 
+    @Column(nullable = false)
+    State state =State.ACTIVE;
+
     public enum Type {
         REGIONAL,
         INDUSTRIAL,
         INTEREST
+    }
+    public enum State{
+        DISBAND,
+        ACTIVE
     }
 }
