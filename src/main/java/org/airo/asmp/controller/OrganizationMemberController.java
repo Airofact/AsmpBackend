@@ -26,8 +26,13 @@ public class OrganizationMemberController {
      * POST /api/organization/{orgId}/member
      */
     @PostMapping
-    public ResponseEntity<OrganizationMember> addMember(@PathVariable UUID orgId,
-                                                       @Valid @RequestBody OrganizationMemberCreateDto createDto) {
+    public ResponseEntity<OrganizationMember> addMember(
+            @PathVariable UUID orgId,
+            @Valid @RequestBody OrganizationMemberCreateDto createDto
+    ) {
+        if (organizationMemberService.isMember(orgId, createDto.alumniId())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
         try {
             OrganizationMember member = organizationMemberService.addMember(orgId, createDto);
             return new ResponseEntity<>(member, HttpStatus.CREATED);

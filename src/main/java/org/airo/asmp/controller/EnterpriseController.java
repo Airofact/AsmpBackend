@@ -7,6 +7,8 @@ import org.airo.asmp.dto.entity.EnterpriseUpdateDto;
 import org.airo.asmp.mapper.entity.EnterpriseMapper;
 import org.airo.asmp.model.entity.Enterprise;
 import org.airo.asmp.repository.entity.EnterpriseRepository;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.airo.asmp.service.EnterpriseService;
@@ -22,30 +24,34 @@ public class EnterpriseController {
 	private final EnterpriseRepository enterpriseRepository;
 	private final EnterpriseMapper enterpriseMapper;
 	private final EnterpriseService enterpriseService;
-
 	@PostMapping
-	public void add(@RequestBody EnterpriseCreateDto enterpriseDto) {
+	public ResponseEntity<Enterprise> add(@RequestBody EnterpriseCreateDto enterpriseDto) {
 		var enterprise = enterpriseMapper.toEntity(enterpriseDto);
-		enterpriseRepository.save(enterprise);
+		Enterprise savedEnterprise = enterpriseRepository.save(enterprise);
+		return ResponseEntity.status(HttpStatus.CREATED).body(savedEnterprise);
 	}
-
 	@PutMapping("/{id}")
-	public void update(@PathVariable UUID id, @RequestBody EnterpriseUpdateDto enterpriseDto) {
+	public ResponseEntity<Enterprise> update(@PathVariable UUID id, @RequestBody EnterpriseUpdateDto enterpriseDto) {
 		Optional<Enterprise> enterprise = enterpriseRepository.findById(id);
 		if (enterprise.isEmpty()) {
-			throw new RuntimeException("id为 %s 的企业不存在！".formatted(id));
+			return ResponseEntity.notFound().build();
 		}
 		var existingEnterprise = enterprise.get();
 		enterpriseMapper.partialUpdate(enterpriseDto, existingEnterprise);
-		enterpriseRepository.save(existingEnterprise);
+		Enterprise updatedEnterprise = enterpriseRepository.save(existingEnterprise);
+		return ResponseEntity.ok(updatedEnterprise);
 	}
-
 	@DeleteMapping("/{id}")
-	public void delete(@PathVariable UUID id) {
+	public ResponseEntity<Void> delete(@PathVariable UUID id) {
 		if (!enterpriseRepository.existsById(id)) {
-			return;
+			return ResponseEntity.notFound().build();
 		}
-		enterpriseRepository.deleteById(id);
+		try {
+			enterpriseRepository.deleteById(id);
+			return ResponseEntity.noContent().build();
+		} catch (DataIntegrityViolationException e) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).build();
+		}
 	}
 
 	@GetMapping("/{id}")

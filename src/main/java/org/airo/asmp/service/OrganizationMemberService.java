@@ -106,6 +106,14 @@ public class OrganizationMemberService {
         
         return organizationMemberRepository.findById(id);
     }
+
+    public Boolean isMember(UUID organizationId, UUID alumniId) {
+        OrganizationAlumniId id = new OrganizationAlumniId();
+        id.setOrganizationId(organizationId);
+        id.setAlumniId(alumniId);
+
+        return organizationMemberRepository.existsById(id);
+    }
     
     /**
      * 根据校友真实姓名查询所有相关的组织名称

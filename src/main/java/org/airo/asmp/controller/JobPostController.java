@@ -11,6 +11,8 @@ import org.airo.asmp.model.job.JobPost;
 import org.airo.asmp.repository.JobPostRepository;
 import org.airo.asmp.service.JobApplicationService;
 import org.airo.asmp.service.JobPostService;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,36 +27,34 @@ public class JobPostController {
     private final JobPostRepository jobPostRepository;
     private final JobPostMapper jobPostMapper;
     private final JobPostService jobPostService;
-    private final JobApplicationService jobApplicationService;
-
-    @PostMapping
-    public ResponseEntity<String> createJobPost(@RequestBody JobPostCreateDto dto) {
+    private final JobApplicationService jobApplicationService;    @PostMapping
+    public ResponseEntity<JobPost> createJobPost(@RequestBody JobPostCreateDto dto) {
         JobPost jobPost = jobPostMapper.toEntity(dto);
         jobPost.setPublishTime(LocalDateTime.now());
-        jobPostRepository.save(jobPost);
-        return ResponseEntity.ok("职位发布成功");
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updateJobPost(@PathVariable UUID id, @RequestBody JobPostUpdateDto dto) {
+        JobPost savedJobPost = jobPostRepository.save(jobPost);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedJobPost);
+    }    @PutMapping("/{id}")
+    public ResponseEntity<JobPost> updateJobPost(@PathVariable UUID id, @RequestBody JobPostUpdateDto dto) {
         var jobPost = jobPostRepository.findById(id);
         if (jobPost.isEmpty()) {
-            return ResponseEntity.badRequest().body("职位不存在");
+            return ResponseEntity.notFound().build();
         }
         
         JobPost existingJobPost = jobPost.get();
         jobPostMapper.partialUpdate(dto, existingJobPost);
-        jobPostRepository.save(existingJobPost);
-        return ResponseEntity.ok("职位更新成功");
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteJobPost(@PathVariable UUID id) {
-        if (jobPostRepository.existsById(id)) {
-            jobPostRepository.deleteById(id);
-            return ResponseEntity.ok("删除成功");
+        JobPost updatedJobPost = jobPostRepository.save(existingJobPost);
+        return ResponseEntity.ok(updatedJobPost);
+    }    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteJobPost(@PathVariable UUID id) {
+        if (!jobPostRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.badRequest().body("职位不存在");
+        try {
+            jobPostRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
     }
 
     @GetMapping("/{id}")

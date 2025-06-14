@@ -12,7 +12,6 @@ import java.util.UUID;
  */
 public record DonationCreateDto(
         @NotNull UUID donorId,
-        @NotNull UUID projectId,
         @NotNull @Positive BigDecimal amount,
         @NotNull Donation.PaymentMethod paymentMethod,
         String remark,

@@ -7,17 +7,14 @@ import org.mapstruct.*;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface JobApplicationMapper {
-    
-    @Mapping(source = "jobPostId", target = "jobPost.id")
+
     @Mapping(source = "alumniId", target = "alumni.id")
     JobApplication toEntity(JobApplicationCreateDto jobApplicationCreateDto);
 
-    @Mapping(source = "jobPost.id", target = "jobPostId")
     @Mapping(source = "alumni.id", target = "alumniId")
     JobApplicationCreateDto toDto(JobApplication jobApplication);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(source = "jobPostId", target = "jobPost.id")
     @Mapping(source = "alumniId", target = "alumni.id")
     JobApplication partialUpdate(JobApplicationCreateDto jobApplicationCreateDto, @MappingTarget JobApplication jobApplication);
 

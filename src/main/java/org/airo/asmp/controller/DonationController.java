@@ -6,6 +6,7 @@ import org.airo.asmp.dto.donation.DonationFilterDto;
 import org.airo.asmp.dto.donation.DonationUpdateDto;
 import org.airo.asmp.model.donation.Donation;
 import org.airo.asmp.service.DonationService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,20 +25,19 @@ public class DonationController {
      * 创建捐赠
      */
     @PostMapping
-    public ResponseEntity<Donation> createDonation(@PathVariable UUID donProjId,
-                                                  @Valid @RequestBody DonationCreateDto createDto) {        // 验证路径参数与DTO中的项目ID一致
-        if (!donProjId.equals(createDto.projectId())) {
-            return ResponseEntity.badRequest().build();
-        }
-        
+    public ResponseEntity<Donation> createDonation(
+            @PathVariable UUID donProjId,
+            @Valid @RequestBody DonationCreateDto createDto
+    ) {
         try {
-            Donation donation = donationService.createDonation(createDto);
+            Donation donation = donationService.createDonation(donProjId, createDto);
             return new ResponseEntity<>(donation, HttpStatus.CREATED);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
-      /**
+
+    /**
      * 更新捐赠
      */
     @PutMapping("/{donId}")
@@ -56,8 +56,7 @@ public class DonationController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-    }
-      /**
+    }    /**
      * 删除捐赠
      */
     @DeleteMapping("/{donId}")
@@ -71,6 +70,8 @@ public class DonationController {
             
             donationService.deleteDonation(donId);
             return ResponseEntity.noContent().build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

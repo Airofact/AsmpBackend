@@ -9,6 +9,7 @@ import org.airo.asmp.model.donation.Donation;
 import org.airo.asmp.model.donation.DonationProject;
 import org.airo.asmp.service.DonationProjectService;
 import org.airo.asmp.service.DonationService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,8 +53,7 @@ public class DonationProjectController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-    
-    /**
+      /**
      * 删除捐赠项目
      */
     @DeleteMapping("/{id}")
@@ -61,6 +61,8 @@ public class DonationProjectController {
         try {
             donationProjectService.deleteProject(id);
             return ResponseEntity.noContent().build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

@@ -37,13 +37,13 @@ public class DonationService {
      * 创建捐赠
      */
     @Transactional
-    public Donation createDonation(DonationCreateDto createDto) {
+    public Donation createDonation(UUID projId, DonationCreateDto createDto) {
         // 验证捐赠者是否存在
         BusinessEntity donor = businessEntityRepository.findById(createDto.donorId())
                 .orElseThrow(() -> new RuntimeException("捐赠者不存在"));
         
         // 验证项目是否存在
-        DonationProject project = donationProjectRepository.findById(createDto.projectId())
+        DonationProject project = donationProjectRepository.findById(projId)
                 .orElseThrow(() -> new RuntimeException("捐赠项目不存在"));
         
         // 检查项目状态是否允许捐赠

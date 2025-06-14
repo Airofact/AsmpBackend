@@ -5,11 +5,12 @@ import org.airo.asmp.dto.job.JobApplicationCreateDto;
 import org.airo.asmp.dto.job.JobApplicationFilterDto;
 import org.airo.asmp.dto.job.JobApplicationUpdateDto;
 import org.airo.asmp.mapper.entity.JobApplicationMapper;
-import org.airo.asmp.model.job.ApplicationStatus;
 import org.airo.asmp.model.job.JobApplication;
 import org.airo.asmp.repository.JobApplicationRepository;
 import org.airo.asmp.repository.JobPostRepository;
 import org.airo.asmp.repository.entity.AlumniRepository;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.airo.asmp.service.JobApplicationService;
@@ -26,71 +27,90 @@ public class JobApplicationController {
     private final JobApplicationMapper jobApplicationMapper;
     private final AlumniRepository alumniRepository;
     private final JobPostRepository jobPostRepository;
-    private final JobApplicationService jobApplicationService;    @PostMapping
-    public ResponseEntity<String> createJobApplication(@PathVariable UUID jobId,
-                                                      @RequestBody JobApplicationCreateDto dto) {
-        // 验证路径参数与DTO中的jobPostId一致
-        if (!jobId.equals(dto.jobPostId())) {
-            return ResponseEntity.badRequest().body("路径中的工作ID与请求体中的工作ID不匹配");
-        }
-        
-        // 检查是否已经申请过
-        var existing = jobApplicationRepository.findByJobPostIdAndAlumniId(dto.jobPostId(), dto.alumniId());
-        if (existing.isPresent()) {
-            return ResponseEntity.badRequest().body("您已经申请过该职位");
-        }
+    private final JobApplicationService jobApplicationService;
 
-        var alumni = alumniRepository.findById(dto.alumniId());
-        if (alumni.isEmpty()) {
-            return ResponseEntity.badRequest().body("Alumni ID 不存在");
-        }
+    @PostMapping
+    public ResponseEntity<JobApplication> createJobApplication(
+            @PathVariable UUID jobId,
+            @RequestBody JobApplicationCreateDto dto
+    ) {
+        try {
+            // 检查是否已经申请过
+            var existing = jobApplicationRepository.findById(jobId)
+                    .stream()
+                    .filter(ja ->
+                            ja.getAlumni().getId().equals(dto.alumniId())&&
+                            ja.getStatus() != JobApplication.ApplicationStatus.REJECTED)
+                    .toList();
+            if (!existing.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(existing.get(0)); // 返回已存在的申请
+            }
 
-        var jobPost = jobPostRepository.findById(dto.jobPostId());
-        if (jobPost.isEmpty()) {
-            return ResponseEntity.badRequest().body("Job Post ID 不存在");
-        }
+            var alumni = alumniRepository.findById(dto.alumniId());
+            if (alumni.isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
 
-        JobApplication jobApplication = jobApplicationMapper.toEntity(dto);
-        jobApplication.setAlumni(alumni.get());
-        jobApplication.setJobPost(jobPost.get());
-        jobApplication.setApplyTime(LocalDateTime.now());
-        jobApplication.setStatus(ApplicationStatus.pending);
-        jobApplicationRepository.save(jobApplication);
-        return ResponseEntity.ok("申请提交成功");
-    }    @PutMapping("/{appId}")
-    public ResponseEntity<String> updateJobApplication(@PathVariable UUID jobId,
+            var jobPost = jobPostRepository.findById(jobId);
+            if (jobPost.isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            JobApplication jobApplication = jobApplicationMapper.toEntity(dto);
+            jobApplication.setAlumni(alumni.get());
+            jobApplication.setJobPost(jobPost.get());
+            jobApplication.setApplyTime(LocalDateTime.now());
+            jobApplication.setStatus(JobApplication.ApplicationStatus.PENDING);
+            JobApplication savedApplication = jobApplicationRepository.save(jobApplication);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedApplication);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/{appId}")
+    public ResponseEntity<JobApplication> updateJobApplication(@PathVariable UUID jobId,
                                                        @PathVariable UUID appId, 
                                                        @RequestBody JobApplicationUpdateDto dto) {
         var jobApplication = jobApplicationRepository.findById(appId);
         if (jobApplication.isEmpty()) {
-            return ResponseEntity.badRequest().body("申请记录不存在");
+            return ResponseEntity.notFound().build();
         }
         
         JobApplication existing = jobApplication.get();
         // 验证申请属于指定的工作
         if (!existing.getJobPost().getId().equals(jobId)) {
-            return ResponseEntity.badRequest().body("申请记录不属于指定的工作");
+            return ResponseEntity.badRequest().build();
         }
         
         jobApplicationMapper.partialUpdate(dto, existing);
-        jobApplicationRepository.save(existing);
-        return ResponseEntity.ok("申请状态更新成功");
-    }    @DeleteMapping("/{appId}")
-    public ResponseEntity<String> deleteJobApplication(@PathVariable UUID jobId, @PathVariable UUID appId) {
+        JobApplication updatedApplication = jobApplicationRepository.save(existing);
+        return ResponseEntity.ok(updatedApplication);
+    }
+
+    @DeleteMapping("/{appId}")
+    public ResponseEntity<Void> deleteJobApplication(@PathVariable UUID jobId, @PathVariable UUID appId) {
         var jobApplication = jobApplicationRepository.findById(appId);
         if (jobApplication.isEmpty()) {
-            return ResponseEntity.badRequest().body("申请记录不存在");
+            return ResponseEntity.notFound().build();
         }
         
         JobApplication existing = jobApplication.get();
         // 验证申请属于指定的工作
         if (!existing.getJobPost().getId().equals(jobId)) {
-            return ResponseEntity.badRequest().body("申请记录不属于指定的工作");
+            return ResponseEntity.badRequest().build();
         }
         
-        jobApplicationRepository.deleteById(appId);
-        return ResponseEntity.ok("删除成功");
-    }    @GetMapping("/{appId}")
+        try {
+            jobApplicationRepository.deleteById(appId);
+            return ResponseEntity.noContent().build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+    }
+
+    @GetMapping("/{appId}")
     public ResponseEntity<JobApplication> getJobApplication(@PathVariable UUID jobId, @PathVariable UUID appId) {
         var jobApplication = jobApplicationRepository.findById(appId);
         if (jobApplication.isEmpty()) {

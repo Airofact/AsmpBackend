@@ -8,6 +8,8 @@ import org.airo.asmp.mapper.entity.AlumniMapper;
 import org.airo.asmp.model.entity.Alumni;
 import org.airo.asmp.repository.entity.AlumniRepository;
 import org.airo.asmp.service.AlumniService;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -21,36 +23,37 @@ import java.util.UUID;
 public class AlumniController {
     private final AlumniRepository alumniRepository;
     private final AlumniMapper alumniMapper;
-    private final AlumniService alumniService;
-
-    //校友注册
+    private final AlumniService alumniService;    //校友注册
     @PostMapping
-    public void add(@Valid @RequestBody AlumniCreateDto alumniCreateDto) {
+    public ResponseEntity<Alumni> add(@Valid @RequestBody AlumniCreateDto alumniCreateDto) {
         Alumni alumni = alumniMapper.toEntity(alumniCreateDto);
-        alumniRepository.save(alumni);
+        Alumni savedAlumni = alumniRepository.save(alumni);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedAlumni);
     }
 
     // 校友信息修改
     @PutMapping("/{id}")
-    public ResponseEntity<String> update(@PathVariable UUID id, @Valid @RequestBody AlumniUpdateDto alumniUpdateDto) {
+    public ResponseEntity<Alumni> update(@PathVariable UUID id, @Valid @RequestBody AlumniUpdateDto alumniUpdateDto) {
         var alumni = alumniRepository.findById(id);
         if (alumni.isEmpty()) {
-            return ResponseEntity.badRequest().body("id为 %s 的校友不存在！".formatted(id));
+            return ResponseEntity.notFound().build();
         }
 
         Alumni existingAlumni = alumni.get();
         alumniMapper.partialUpdate(alumniUpdateDto, existingAlumni);
-        alumniRepository.save(existingAlumni);
-        return ResponseEntity.ok("校友信息修改成功！");
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable UUID id) {
+        Alumni updatedAlumni = alumniRepository.save(existingAlumni);
+        return ResponseEntity.ok(updatedAlumni);
+    }    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         if (!alumniRepository.existsById(id)) {
-            return ResponseEntity.badRequest().body("id为 %s 的校友不存在！".formatted(id));
+            return ResponseEntity.notFound().build();
         }
-        alumniRepository.deleteById(id);
-        return ResponseEntity.ok("校友删除成功！");
+        try {
+            alumniRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
     }
 
     @GetMapping("/{id}")

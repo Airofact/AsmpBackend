@@ -5,25 +5,28 @@ import org.airo.asmp.dto.AdminDto;
 import org.airo.asmp.mapper.AdminMapper;
 import org.airo.asmp.model.Admin;
 import org.airo.asmp.repository.AdminRepository;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/admin")
 @RequiredArgsConstructor
 public class AdminController {
 	private final AdminRepository adminRepository;
-	private final AdminMapper adminMapper;
-	@PostMapping("/register")
-	private ResponseEntity<String> register(@Valid @RequestBody AdminDto adminDto) {
+	private final AdminMapper adminMapper;	@PostMapping("/register")
+	private ResponseEntity<Admin> register(@Valid @RequestBody AdminDto adminDto) {
 		if (adminRepository.existsByUsername(adminDto.username())) {
-			return ResponseEntity.badRequest().body("用户名重复");
+			return ResponseEntity.badRequest().build();
 		}
-		return ResponseEntity.ok(adminRepository.save(adminMapper.toEntity(adminDto)).getId().toString());
+		Admin savedAdmin = adminRepository.save(adminMapper.toEntity(adminDto));
+		return ResponseEntity.status(HttpStatus.CREATED).body(savedAdmin);
 	}
 
 	@PostMapping("/login")

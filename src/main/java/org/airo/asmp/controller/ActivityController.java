@@ -16,6 +16,8 @@ import org.airo.asmp.repository.ActivityRepository;
 import org.airo.asmp.repository.entity.OrganizationRepository;
 import org.airo.asmp.service.ActivityApplicationService;
 import org.airo.asmp.service.ActivityService;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -33,52 +35,54 @@ public class ActivityController {
     private final OrganizationRepository organizationRepository;
     private final ActivityMapper activityMapper;
     private final ActivityService activityService;
-    private final ActivityApplicationService activityApplicationService;
-
-    // 活动注册
+    private final ActivityApplicationService activityApplicationService;    // 活动注册
     @PostMapping
-    public ResponseEntity<String> add(@Valid @RequestBody ActivityCreateDto activityCreateDto) {
-        Organization organization = organizationRepository.findById(activityCreateDto.organizer()).orElseThrow(() -> new RuntimeException("组织不存在"));
+    public ResponseEntity<Activity> add(@Valid @RequestBody ActivityCreateDto activityCreateDto) {
+        Organization organization = organizationRepository.findById(activityCreateDto.organizer()).orElse(null);
+        if (organization == null) {
+            return ResponseEntity.badRequest().build();
+        }
         if(activityCreateDto.startTime().isBefore(activityCreateDto.endTime())) {
             Activity activity = activityMapper.toEntity(activityCreateDto);
             activity.setOrganizer(organization);
-            activityRepository.save(activity);
-            return ResponseEntity.ok("活动添加成功！");
+            Activity savedActivity = activityRepository.save(activity);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedActivity);
         } else {
-            return ResponseEntity.badRequest().body("添加失败，请检查日期");
+            return ResponseEntity.badRequest().build();
         }
     }
 
     // 活动信息修改
     @PutMapping("/{id}")
-    public ResponseEntity<String> update(@PathVariable UUID id, @Valid @RequestBody ActivityUpdateDto activityUpdateDto) {
+    public ResponseEntity<Activity> update(@PathVariable UUID id, @Valid @RequestBody ActivityUpdateDto activityUpdateDto) {
         var activity = activityRepository.findById(id);
         if (activity.isEmpty()) {
-            return ResponseEntity.badRequest().body("id为 %s 的活动不存在！".formatted(id));
+            return ResponseEntity.notFound().build();
         }
         
         if(activityUpdateDto.startTime().isAfter(activityUpdateDto.endTime())) {
-            return ResponseEntity.badRequest().body("修改失败，请检查日期");
+            return ResponseEntity.badRequest().build();
         }
 
         Activity existingActivity = activity.get();
         activityMapper.partialUpdate(activityUpdateDto, existingActivity);
-        activityRepository.save(existingActivity);
-        return ResponseEntity.ok("活动信息修改成功！");
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable UUID id) {
+        Activity updatedActivity = activityRepository.save(existingActivity);
+        return ResponseEntity.ok(updatedActivity);
+    }    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         Optional<Activity> optionalActivity = activityRepository.findById(id);
         if (optionalActivity.isEmpty()) {
-            return ResponseEntity.badRequest().body("id为 %s 的活动不存在！".formatted(id));
+            return ResponseEntity.notFound().build();
         }
         Activity activity = optionalActivity.get();
-        if (LocalDateTime.now().isBefore(activity.getStartTime())) {
+        if (LocalDateTime.now().isAfter(activity.getStartTime())) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
             activityRepository.deleteById(id);
-            return ResponseEntity.ok("活动删除成功！");
-        } else {
-            return ResponseEntity.badRequest().body("活动已经在举行或已结束，无法删除");
+            return ResponseEntity.noContent().build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }
 

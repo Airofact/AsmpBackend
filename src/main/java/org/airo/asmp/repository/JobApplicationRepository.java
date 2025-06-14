@@ -1,6 +1,5 @@
 package org.airo.asmp.repository;
 
-import org.airo.asmp.model.job.ApplicationStatus;
 import org.airo.asmp.model.job.JobApplication;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -17,7 +16,7 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
     
     List<JobApplication> findByAlumniId(UUID alumniId);
     
-    List<JobApplication> findByStatus(ApplicationStatus status);
+    List<JobApplication> findByStatus(JobApplication.ApplicationStatus status);
     
     // 查询特定职位和校友的申请
     @Query("SELECT ja FROM JobApplication ja WHERE ja.jobPost.id = :jobPostId AND ja.alumni.id = :alumniId")

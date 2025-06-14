@@ -5,13 +5,11 @@ import java.util.UUID;
 
 /**
  * DTO for {@link org.airo.asmp.model.job.JobApplication}
- * @param jobPostId
  * @param alumniId
  * @param applyTime
  */
 
 public record JobApplicationCreateDto(
-        UUID jobPostId,      
         UUID alumniId,        
         LocalDateTime applyTime
 ) {

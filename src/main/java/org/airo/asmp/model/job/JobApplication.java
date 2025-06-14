@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.airo.asmp.model.entity.Alumni;
-import org.airo.asmp.model.job.JobPost;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
@@ -19,11 +18,11 @@ public class JobApplication {
     UUID id; 
 
     @ManyToOne
-    @JoinColumn(name = "jobPostId")
+    @JoinColumn(name = "job_post_id")
     JobPost jobPost; 
 
     @ManyToOne
-    @JoinColumn(name = "alumniId")
+    @JoinColumn(name = "alumni_id")
     private Alumni alumni; 
 
     @Column
@@ -31,5 +30,13 @@ public class JobApplication {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    ApplicationStatus status = ApplicationStatus.pending;
+    ApplicationStatus status = ApplicationStatus.PENDING;
+
+    public enum ApplicationStatus {
+        PENDING,
+        TESTED,
+        INTERVIEWED,
+        HIRED,
+        REJECTED,
+    }
 }

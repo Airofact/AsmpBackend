@@ -29,53 +29,64 @@ public class ActivityApplicationController {
     private final ActivityRepository activityRepository;
     private final AlumniRepository alumniRepository;
     private final ActivityApplicationMapper activityApplicationMapper;
-    private final ActivityApplicationService activityApplicationService;    @PostMapping
+    private final ActivityApplicationService activityApplicationService;
+
+    @PostMapping
     public ResponseEntity<String> add(@PathVariable UUID actId, 
                                      @Valid @RequestBody ActivityApplicationCreateDto activityApplicationCreateDto) {
-        UUID activityId = actId;
-        UUID alumniId = activityApplicationCreateDto.alumniId();
+		UUID alumniId = activityApplicationCreateDto.alumniId();
 
-        if (!activityRepository.existsById(activityId)) {
+        var activity = activityRepository.findById(actId);
+        if (activity.isEmpty()) {
             return ResponseEntity.badRequest().body("无效活动，请查看是否录入");
         }
-        if (!alumniRepository.existsById(alumniId)) {
+        var alumni = alumniRepository.findById(alumniId);
+        if (alumni.isEmpty()) {
             return ResponseEntity.badRequest().body("不存在该校友");
         }
 
         ActivityApplication application = activityApplicationMapper.toEntity(activityApplicationCreateDto);
         // 设置复合主键
         ActivityAlumniId id = new ActivityAlumniId();
-        id.setActivityId(activityId);
+        id.setActivityId(actId);
         id.setAlumniId(alumniId);
         application.setId(id);
+        application.setActivity(activity.get());
+        application.setAlumni(alumni.get());
         
         application.setApplyTime(LocalDateTime.now());
         activityApplicationRepository.save(application);
         return ResponseEntity.status(HttpStatus.CREATED).body("已提交申请");
-    }    @GetMapping("/{appId}")
+    }
+
+    @GetMapping("/{alumniId}")
     public ResponseEntity<ActivityApplication> getById(@PathVariable UUID actId, 
-                                                      @PathVariable UUID appId) {
+                                                      @PathVariable UUID alumniId) {
         ActivityAlumniId id = new ActivityAlumniId();
         id.setActivityId(actId);
-        id.setAlumniId(appId);
+        id.setAlumniId(alumniId);
         
         Optional<ActivityApplication> application = activityApplicationRepository.findById(id);
         return application.map(ResponseEntity::ok)
                          .orElse(ResponseEntity.notFound().build());
-    }@GetMapping
+    }
+
+    @GetMapping
     public ResponseEntity<List<ActivityApplication>> getAll(@PathVariable UUID actId) {
         List<ActivityApplication> applications = activityApplicationRepository.findAll()
                 .stream()
                 .filter(app -> app.getId().getActivityId().equals(actId))
                 .toList();
         return ResponseEntity.ok(applications);
-    }    @PutMapping("/{appId}")
+    }
+
+    @PutMapping("/{alumniId}")
     public ResponseEntity<String> update(@PathVariable UUID actId, 
-                                        @PathVariable UUID appId, 
+                                        @PathVariable UUID alumniId,
                                         @Valid @RequestBody ActivityApplicationUpdateDto activityApplicationUpdateDto) {
         ActivityAlumniId id = new ActivityAlumniId();
         id.setActivityId(actId);
-        id.setAlumniId(appId);
+        id.setAlumniId(alumniId);
         
         var application = activityApplicationRepository.findById(id);
         if (application.isEmpty()) {
@@ -86,11 +97,13 @@ public class ActivityApplicationController {
         activityApplicationMapper.partialUpdate(activityApplicationUpdateDto, existingApplication);
         activityApplicationRepository.save(existingApplication);
         return ResponseEntity.ok("申请信息修改成功！");
-    }    @DeleteMapping("/{appId}")
-    public ResponseEntity<String> delete(@PathVariable UUID actId, @PathVariable UUID appId) {
+    }
+
+    @DeleteMapping("/{alumniId}")
+    public ResponseEntity<String> delete(@PathVariable UUID actId, @PathVariable UUID alumniId) {
         ActivityAlumniId id = new ActivityAlumniId();
         id.setActivityId(actId);
-        id.setAlumniId(appId);
+        id.setAlumniId(alumniId);
         
         if (!activityApplicationRepository.existsById(id)) {
             return ResponseEntity.badRequest().body("id为 %s 的申请不存在！".formatted(id));
@@ -98,7 +111,9 @@ public class ActivityApplicationController {
 
         activityApplicationRepository.deleteById(id);
         return ResponseEntity.ok("申请删除成功！");
-    }    // 申请分组查询
+    }
+
+    // 申请分组查询
     @PostMapping("/filter")
     public List<ActivityApplication> filter(@PathVariable UUID actId, 
                                            @RequestBody ActivityApplicationFilterDto activityApplicationFilterDto) {
