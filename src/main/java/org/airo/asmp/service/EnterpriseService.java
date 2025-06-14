@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.airo.asmp.dto.entity.EnterpriseFilterDto;
 import org.airo.asmp.model.entity.Enterprise;
 import org.airo.asmp.repository.entity.EnterpriseRepository;
-import org.airo.asmp.util.SpecificationBuilder;
+import org.airo.asmp.util.OptionalSpecificationBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +42,7 @@ public class EnterpriseService {
         }
         
         return enterpriseRepository.findAll((root, query, builder) ->
-            SpecificationBuilder.of(root, builder)
+            OptionalSpecificationBuilder.of(root, builder)
                 .like("name", filterDto.getName())
                 .equal("field", filterDto.getField())
                 .like("address", filterDto.getAddress())

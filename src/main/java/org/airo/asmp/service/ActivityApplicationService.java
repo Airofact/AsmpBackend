@@ -5,7 +5,7 @@ import org.airo.asmp.dto.activity.ActivityApplicationFilterDto;
 import org.airo.asmp.model.activity.ActivityAlumniId;
 import org.airo.asmp.model.activity.ActivityApplication;
 import org.airo.asmp.repository.ActivityApplicationRepository;
-import org.airo.asmp.util.SpecificationBuilder;
+import org.airo.asmp.util.OptionalSpecificationBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +49,7 @@ public class ActivityApplicationService {
             alumniService.findByFilter(filterDto.alumniFilter()) : null;
             
         return activityApplicationRepository.findAll((root, query, builder) ->
-            SpecificationBuilder.of(root, builder)
+            OptionalSpecificationBuilder.of(root, builder)
                     .in("activity", activities)
                     .in("alumni", alumni)
                     .dateTimeAfterOrEqual("applyTime", filterDto.applyTimeBegin())

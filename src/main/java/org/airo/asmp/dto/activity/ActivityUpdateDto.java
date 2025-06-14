@@ -7,6 +7,6 @@ public record ActivityUpdateDto(String title,
                                 LocalDateTime startTime,
                                 LocalDateTime endTime,
                                 String location,
-                                int maxParticipants) {
+                                Integer maxParticipants) {
     // 移除status字段，因为它现在是计算列
 }

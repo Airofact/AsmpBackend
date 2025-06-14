@@ -7,8 +7,8 @@ public record JobPostUpdateDto(
         String title,           
         String description,             
         String jobType,
-        int salaryMin,    
-        int salaryMax,              
+        Integer salaryMin,
+		Integer salaryMax,
         LocalDateTime publishTime                                 
 ) implements Serializable {
 }

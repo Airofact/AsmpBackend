@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.airo.asmp.dto.job.JobApplicationFilterDto;
 import org.airo.asmp.model.job.JobApplication;
 import org.airo.asmp.repository.JobApplicationRepository;
-import org.airo.asmp.util.SpecificationBuilder;
+import org.airo.asmp.util.OptionalSpecificationBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +41,7 @@ public class JobApplicationService {
         }
         
         return jobApplicationRepository.findAll((root, query, builder) ->
-            SpecificationBuilder.of(root, builder)
+            OptionalSpecificationBuilder.of(root, builder)
                 .equal("id", filterDto.id())
                 .equal("jobPost.id", filterDto.jobPostId())
                 .equal("alumni.id", filterDto.alumniId())

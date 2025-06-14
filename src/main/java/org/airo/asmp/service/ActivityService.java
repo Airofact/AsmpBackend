@@ -6,7 +6,7 @@ import org.airo.asmp.dto.activity.ActivityStatusCountDto;
 import org.airo.asmp.model.activity.Activity;
 import org.airo.asmp.model.activity.Status;
 import org.airo.asmp.repository.ActivityRepository;
-import org.airo.asmp.util.SpecificationBuilder;
+import org.airo.asmp.util.OptionalSpecificationBuilder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -83,7 +83,7 @@ public class ActivityService {
             alumniService.findByFilter(filterDto.organizerFilter()) : null;
             
         List<Activity> filteredActivities = activityRepository.findAll((root, query, builder) ->
-            SpecificationBuilder.of(root, builder)
+            OptionalSpecificationBuilder.of(root, builder)
                     .like("title", filterDto.title())
                     .like("description", filterDto.description())
                     .dateTimeAfterOrEqual("startTime", filterDto.startTimeBegin())

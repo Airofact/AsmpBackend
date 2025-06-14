@@ -14,6 +14,7 @@ import org.airo.asmp.service.JobPostService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,6 +30,7 @@ public class JobPostController {
     @PostMapping
     public ResponseEntity<String> createJobPost(@RequestBody JobPostCreateDto dto) {
         JobPost jobPost = jobPostMapper.toEntity(dto);
+        jobPost.setPublishTime(LocalDateTime.now());
         jobPostRepository.save(jobPost);
         return ResponseEntity.ok("职位发布成功");
     }

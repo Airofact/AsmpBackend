@@ -11,7 +11,7 @@ public record ActivityCreateDto(
         LocalDateTime startTime,
         LocalDateTime endTime,
         String location,
-        int maxParticipants,
+        Integer maxParticipants,
         UUID organizer
         // 移除status字段，因为它现在是计算列
 ){ }

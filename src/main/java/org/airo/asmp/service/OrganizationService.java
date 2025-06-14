@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.airo.asmp.dto.entity.OrganizationFilterDto;
 import org.airo.asmp.model.entity.Organization;
 import org.airo.asmp.repository.entity.OrganizationRepository;
-import org.airo.asmp.util.SpecificationBuilder;
+import org.airo.asmp.util.OptionalSpecificationBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +46,7 @@ public class OrganizationService {
             alumniService.findByFilter(filterDto.getCreatorFilter()) : null;
             
         return organizationRepository.findAll((root, query, builder) ->
-            SpecificationBuilder.of(root, builder)
+            OptionalSpecificationBuilder.of(root, builder)
                     .dateTimeAfterOrEqual("addedAt", filterDto.getAddedAtBegin())
                     .dateTimeBefore("addedAt", filterDto.getAddedAtEnd())
                     .like("name", filterDto.getName())

@@ -7,5 +7,5 @@ import org.airo.asmp.model.activity.ActivityApplication;
  * Only mutable fields can be updated
  */
 public record ActivityApplicationUpdateDto(
-        boolean signedIn
+        Boolean signedIn
 ) {}

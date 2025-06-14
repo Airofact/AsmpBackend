@@ -9,7 +9,7 @@ import org.airo.asmp.model.entity.BusinessEntity;
 import org.airo.asmp.model.donation.DonationProject;
 import org.airo.asmp.repository.entity.BusinessEntityRepository;
 import org.airo.asmp.repository.DonationProjectRepository;
-import org.airo.asmp.util.SpecificationBuilder;
+import org.airo.asmp.util.OptionalSpecificationBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -222,7 +222,7 @@ public class DonationProjectService {
             businessEntityService.findByFilter(filter.organizerFilter()) : null;
             
         return donationProjectRepository.findAll((root, query, builder) ->
-                SpecificationBuilder.of(root, builder)
+                OptionalSpecificationBuilder.of(root, builder)
                         .in("organizer", organizers)
                         .like("name", filter.name())
                         .like("description", filter.description())

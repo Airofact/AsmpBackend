@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.airo.asmp.dto.NoticeFilterDto;
 import org.airo.asmp.model.notice.Notice;
 import org.airo.asmp.repository.NoticeRepository;
-import org.airo.asmp.util.SpecificationBuilder;
+import org.airo.asmp.util.OptionalSpecificationBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +42,7 @@ public class NoticeService {
         }
         
         return noticeRepository.findAll((root, query, builder) ->
-            SpecificationBuilder.of(root, builder)
+            OptionalSpecificationBuilder.of(root, builder)
                 .like("title", filterDto.title())
                 .like("content", filterDto.content())
                 .equal("type", filterDto.type())

@@ -9,10 +9,10 @@ import java.time.LocalDateTime;
  */
 public record JobPostFilterDto(
         String title,                  
-        int salaryMinLowerBound,
-		int salaryMinUpperBound,
-		int salaryMaxLowerBound,
-		int salaryMaxUpperBound,
+        Integer salaryMinLowerBound,
+		Integer salaryMinUpperBound,
+		Integer salaryMaxLowerBound,
+		Integer salaryMaxUpperBound,
         String jobType,
         String description,                            
         EnterpriseFilterDto enterpriseFilter,

@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.airo.asmp.dto.donation.DonationFilterDto;
-import org.airo.asmp.util.SpecificationBuilder;
+import org.airo.asmp.util.OptionalSpecificationBuilder;
 
 @Service
 @RequiredArgsConstructor
@@ -230,7 +230,7 @@ public class DonationService {
             donationProjectService.findByFilter(filter.donationProjectFilter()) : null;
             
         return donationRepository.findAll((root, query, builder) ->
-            SpecificationBuilder.of(root, builder)
+            OptionalSpecificationBuilder.of(root, builder)
                     .in("donor", donors)
                     .in("project", donationProjects)
                     .greaterThanOrEqualTo("amount", filter.minAmount())
