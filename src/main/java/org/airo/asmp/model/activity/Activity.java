@@ -34,6 +34,7 @@ public class Activity {
 
 	@Column(columnDefinition = "int")
 	int maxParticipants;
+
 	@ManyToOne
 	@JoinColumn(name = "organizer_id")
 	Organization organizer;

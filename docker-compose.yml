@@ -2,6 +2,11 @@ services:
   # 自定义MySQL服务（使用airo271/mysql镜像）
   custom-mysql:
     image: mysql
+    command: [
+      'mysqld',
+      '--character-set-server=utf8mb4',
+      '--collation-server=utf8mb4_unicode_ci'
+    ]
     container_name: custom-mysql
     environment:
       MYSQL_ROOT_PASSWORD: Airo&mysql
@@ -22,7 +27,11 @@ services:
     ports:
       - "8080:8080"  # 暴露8080给宿主机
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://custom-mysql:3306/alumni_db?useSSL=false&allowPublicKeyRetrieval=true
+      LANG: C.UTF-8
+      SERVER_SERVLET_ENCODING_CHARSET: UTF-8
+      SERVER_SERVLET_ENCODING_ENABLED: true
+      SERVER_SERVLET_ENCODING_FORCE: true
+      SPRING_DATASOURCE_URL: jdbc:mysql://custom-mysql:3306/alumni_db?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: Airo&mysql
     depends_on:

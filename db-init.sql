@@ -1,6 +1,11 @@
 CREATE DATABASE IF NOT EXISTS alumni_db;
 USE alumni_db;
 
+SET NAMES utf8mb4;
+SET CHARACTER_SET_CLIENT = utf8mb4;
+SET CHARACTER_SET_CONNECTION = utf8mb4;
+SET CHARACTER_SET_RESULTS = utf8mb4;
+
 CREATE TABLE IF NOT EXISTS activity
 (
     id               BINARY(16)   NOT NULL,
@@ -196,8 +201,6 @@ ALTER TABLE `organization`
 
 ALTER TABLE `organization`
     ADD CONSTRAINT FK_ORGANIZATION_ON_ID FOREIGN KEY (id) REFERENCES business_entity (id);
-
-GO
 
 -- 校友服务管理平台测试数据初始化脚本
 -- 生成日期: 2025-06-13
