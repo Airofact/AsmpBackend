@@ -23,7 +23,7 @@ import java.util.UUID;
 @RequestMapping("/api/donation-project")
 @RequiredArgsConstructor
 public class DonationProjectController {
-    
+
     private final DonationProjectService donationProjectService;
     private final DonationService donationService;
 
@@ -37,12 +37,12 @@ public class DonationProjectController {
             return new ResponseEntity<>(project, HttpStatus.CREATED);
 
     }
-    
+
     /**
      * 更新捐赠项目
      */
     @PutMapping("/{id}")
-    public ResponseEntity<DonationProject> updateProject(@PathVariable UUID id, 
+    public ResponseEntity<DonationProject> updateProject(@PathVariable UUID id,
                                                         @Valid @RequestBody DonationProjectUpdateDto updateDto) {
 
             DonationProject project = donationProjectService.updateProject(id, updateDto);
@@ -58,7 +58,7 @@ public class DonationProjectController {
             return ResponseEntity.noContent().build();
 
     }
-    
+
     /**
      * 根据ID查询项目
      */
@@ -76,14 +76,15 @@ public class DonationProjectController {
         List<DonationProject> projects = donationProjectService.findAll();
         return ResponseEntity.ok(projects);
     }
-      /**
+
+    /**
      * 根据条件查询项目
      */    @PostMapping("/filter")
     public ResponseEntity<List<DonationProject>> searchProjects(@RequestBody DonationProjectFilterDto filter) {
         List<DonationProject> projects = donationProjectService.findByFilter(filter);
         return ResponseEntity.ok(projects);
     }
-    
+
     /**
      * 根据状态查询项目
      */
@@ -92,7 +93,7 @@ public class DonationProjectController {
         List<DonationProject> projects = donationProjectService.findByStatus(status);
         return ResponseEntity.ok(projects);
     }
-    
+
     /**
      * 根据分类查询项目
      */
@@ -101,7 +102,7 @@ public class DonationProjectController {
         List<DonationProject> projects = donationProjectService.findByCategory(category);
         return ResponseEntity.ok(projects);
     }
-    
+
     /**
      * 根据发起者查询项目
      */
@@ -110,7 +111,7 @@ public class DonationProjectController {
         List<DonationProject> projects = donationProjectService.findByOrganizer(organizerId);
         return ResponseEntity.ok(projects);
     }
-    
+
     /**
      * 查询活跃项目
      */
@@ -119,7 +120,7 @@ public class DonationProjectController {
         List<DonationProject> projects = donationProjectService.findActiveProjects();
         return ResponseEntity.ok(projects);
     }
-    
+
     /**
      * 查询已达到目标的项目
      */
@@ -128,7 +129,7 @@ public class DonationProjectController {
         List<DonationProject> projects = donationProjectService.findTargetReachedProjects();
         return ResponseEntity.ok(projects);
     }
-    
+
     /**
      * 关闭项目
      */
@@ -139,7 +140,7 @@ public class DonationProjectController {
             return ResponseEntity.ok(project);
 
     }
-    
+
     /**
      * 暂停项目
      */
@@ -149,7 +150,13 @@ public class DonationProjectController {
             return ResponseEntity.ok(project);
 
     }
-    
+
+    @PostMapping("/{id}/resume")
+    public ResponseEntity<DonationProject> resumeProject(@PathVariable UUID id) {
+            DonationProject project = donationProjectService.resumeProject(id);
+            return ResponseEntity.ok(project);
+    }
+
     /**
      * 完成项目
      */
@@ -159,7 +166,7 @@ public class DonationProjectController {
             return ResponseEntity.ok(project);
 
     }
-    
+
     /**
      * 检查项目是否可以接受捐赠
      */
@@ -170,18 +177,18 @@ public class DonationProjectController {
             return ResponseEntity.ok(canDonate);
 
     }
-    
+
     /**
      * 更新项目当前金额
      */
     @PutMapping("/{id}/amount")
-    public ResponseEntity<DonationProject> updateCurrentAmount(@PathVariable UUID id, 
+    public ResponseEntity<DonationProject> updateCurrentAmount(@PathVariable UUID id,
                                                               @RequestParam BigDecimal amount) {
             DonationProject project = donationProjectService.updateCurrentAmount(id, amount);
             return ResponseEntity.ok(project);
 
     }
-    
+
     /**
      * 获取项目进度信息
      */
@@ -208,9 +215,9 @@ public class DonationProjectController {
             Double progressPercentage,
             Boolean targetReached
     ) {}
-    
+
     // ===== 全局捐赠相关端点 =====
-    
+
     /**
      * 获取所有捐赠（不限特定项目）
      */
@@ -219,7 +226,7 @@ public class DonationProjectController {
         List<Donation> donations = donationService.findAll();
         return ResponseEntity.ok(donations);
     }
-    
+
     /**
      * 捐赠过滤查询（不限特定项目）
      */

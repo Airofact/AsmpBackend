@@ -24,13 +24,17 @@ import java.util.UUID;
 public class NoticeController {
     private final NoticeRepository noticeRepository;
     private final NoticeMapper noticeMapper;
-    private final NoticeService noticeService;    // 通知注册
+    private final NoticeService noticeService;
+
+    // 通知注册
     @PostMapping
     public ResponseEntity<Notice> add(@Valid @RequestBody NoticeCreateDto noticeCreateDto) {
         Notice notice = noticeMapper.toEntity(noticeCreateDto);
         Notice savedNotice = noticeRepository.save(notice);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedNotice);
-    }    // 通知信息修改
+    }
+
+    // 通知信息修改
     @PutMapping("/{id}")
     public ResponseEntity<Notice> update(@PathVariable UUID id, @Valid @RequestBody NoticeUpdateDto noticeUpdateDto) {
         var notice = noticeRepository.findById(id);
@@ -42,7 +46,9 @@ public class NoticeController {
         noticeMapper.partialUpdate(noticeUpdateDto, existingNotice);
         Notice updatedNotice = noticeRepository.save(existingNotice);
         return ResponseEntity.ok(updatedNotice);
-    }    @DeleteMapping("/{id}")
+    }
+
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         if (!noticeRepository.existsById(id)) {
             return ResponseEntity.notFound().build();

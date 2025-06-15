@@ -18,9 +18,9 @@ import java.util.UUID;
 @RequestMapping("/api/organization/{orgId}/member")
 @RequiredArgsConstructor
 public class OrganizationMemberController {
-    
+
     private final OrganizationMemberService organizationMemberService;
-    
+
     /**
      * 添加组织成员
      * POST /api/organization/{orgId}/member
@@ -37,7 +37,7 @@ public class OrganizationMemberController {
             OrganizationMember member = organizationMemberService.addMember(orgId, createDto);
             return new ResponseEntity<>(member, HttpStatus.CREATED);
     }
-    
+
     /**
      * 获取组织的所有成员
      * GET /api/organization/{orgId}/member
@@ -47,7 +47,7 @@ public class OrganizationMemberController {
         List<OrganizationMember> members = organizationMemberService.getMembersByOrganizationId(orgId);
         return ResponseEntity.ok(members);
     }
-    
+
     /**
      * 获取特定成员信息
      * GET /api/organization/{orgId}/member/{memId}
@@ -59,7 +59,7 @@ public class OrganizationMemberController {
                 .map(member -> ResponseEntity.ok(member))
                 .orElse(ResponseEntity.notFound().build());
     }
-    
+
     /**
      * 更新成员信息
      * PUT /api/organization/{orgId}/member/{memId}
@@ -72,7 +72,7 @@ public class OrganizationMemberController {
             OrganizationMember member = organizationMemberService.updateMember(orgId, memId, updateDto);
             return ResponseEntity.ok(member);
     }
-    
+
     /**
      * 移除组织成员
      * DELETE /api/organization/{orgId}/member/{memId}
@@ -85,7 +85,7 @@ public class OrganizationMemberController {
             return ResponseEntity.noContent().build();
 
     }
-    
+
     /**
      * 根据过滤条件查询组织成员
      * POST /api/organization/{orgId}/member/search
@@ -96,7 +96,7 @@ public class OrganizationMemberController {
         List<OrganizationMember> members = organizationMemberService.findByFilter(orgId, filter);
         return ResponseEntity.ok(members);
     }
-    
+
     /**
      * 根据角色查询组织成员
      * GET /api/organization/{orgId}/member/role/{role}

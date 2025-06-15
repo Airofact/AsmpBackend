@@ -23,12 +23,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class DonationProjectService {
-    
+
     private final DonationProjectRepository donationProjectRepository;
     private final BusinessEntityRepository<BusinessEntity> businessEntityRepository;
     private final DonationProjectMapper donationProjectMapper;
     private final BusinessEntityService businessEntityService;
-    
+
     /**
      * 创建捐赠项目
      */
@@ -40,21 +40,21 @@ public class DonationProjectService {
             organizer = businessEntityRepository.findById(createDto.organizerId())
                     .orElseThrow(() -> new RuntimeException("项目发起者不存在"));
         }
-        
+
         // 验证项目名称是否已存在
         if (donationProjectRepository.findByName(createDto.name()) != null) {
             throw new RuntimeException("项目名称已存在");
         }
-        
+
         // 创建项目实体
         DonationProject project = donationProjectMapper.createDtoToEntity(createDto);
         project.setOrganizer(organizer);
         project.setStatus(DonationProject.ProjectStatus.ACTIVE);
         project.setCurrentAmount(BigDecimal.ZERO);
-        
+
         return donationProjectRepository.save(project);
     }
-    
+
     /**
      * 更新捐赠项目
      */
@@ -62,14 +62,14 @@ public class DonationProjectService {
     public DonationProject updateProject(UUID id, DonationProjectUpdateDto updateDto) {
         DonationProject project = donationProjectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("捐赠项目不存在"));
-        
+
         // 如果要更新发起者
         if (updateDto.organizerId() != null) {
             BusinessEntity organizer = businessEntityRepository.findById(updateDto.organizerId())
                     .orElseThrow(() -> new RuntimeException("项目发起者不存在"));
             project.setOrganizer(organizer);
         }
-        
+
         // 如果要更新项目名称，检查是否重复
         if (updateDto.name() != null && !updateDto.name().equals(project.getName())) {
             DonationProject existingProject = donationProjectRepository.findByName(updateDto.name());
@@ -77,12 +77,12 @@ public class DonationProjectService {
                 throw new RuntimeException("项目名称已存在");
             }
         }
-        
+
         donationProjectMapper.updateEntityFromDto(updateDto, project);
-        
+
         return donationProjectRepository.save(project);
     }
-    
+
     /**
      * 删除捐赠项目
      */
@@ -90,15 +90,15 @@ public class DonationProjectService {
     public void deleteProject(UUID id) {
         DonationProject project = donationProjectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("捐赠项目不存在"));
-        
+
         // 检查项目是否可以删除（例如是否有相关捐赠记录）
         if (project.getCurrentAmount().compareTo(BigDecimal.ZERO) > 0) {
             throw new RuntimeException("已有捐赠的项目不能删除，只能关闭");
         }
-        
+
         donationProjectRepository.delete(project);
     }
-    
+
     /**
      * 根据ID查询项目
      */
@@ -136,7 +136,7 @@ public class DonationProjectService {
         return donationProjectRepository.findByStatusAndEndDateAfter(
                 DonationProject.ProjectStatus.ACTIVE, LocalDateTime.now());
     }
-    
+
     /**
      * 查询已达到目标的项目
      */
@@ -145,7 +145,7 @@ public class DonationProjectService {
                 .filter(DonationProject::isTargetReached)
                 .toList();
     }
-    
+
     /**
      * 关闭项目
      */
@@ -153,11 +153,11 @@ public class DonationProjectService {
     public DonationProject closeProject(UUID id) {
         DonationProject project = donationProjectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("捐赠项目不存在"));
-        
+
         project.setStatus(DonationProject.ProjectStatus.CLOSED);
         return donationProjectRepository.save(project);
     }
-    
+
     /**
      * 暂停项目
      */
@@ -165,11 +165,11 @@ public class DonationProjectService {
     public DonationProject suspendProject(UUID id) {
         DonationProject project = donationProjectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("捐赠项目不存在"));
-        
+
         project.setStatus(DonationProject.ProjectStatus.SUSPENDED);
         return donationProjectRepository.save(project);
     }
-    
+
     /**
      * 完成项目
      */
@@ -177,11 +177,11 @@ public class DonationProjectService {
     public DonationProject completeProject(UUID id) {
         DonationProject project = donationProjectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("捐赠项目不存在"));
-        
+
         project.setStatus(DonationProject.ProjectStatus.COMPLETED);
         return donationProjectRepository.save(project);
     }
-    
+
     /**
      * 更新项目当前金额
      */
@@ -189,27 +189,27 @@ public class DonationProjectService {
     public DonationProject updateCurrentAmount(UUID id, BigDecimal amount) {
         DonationProject project = donationProjectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("捐赠项目不存在"));
-        
+
         project.setCurrentAmount(amount);
         return donationProjectRepository.save(project);
     }
-    
+
     /**
      * 检查项目是否可以接受捐赠
      */
     public boolean canAcceptDonation(UUID id) {
         DonationProject project = donationProjectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("捐赠项目不存在"));
-        
+
         // 检查项目状态
         if (project.getStatus() != DonationProject.ProjectStatus.ACTIVE) {
             return false;
         }
-        
+
         // 检查结束时间
 		return project.getEndDate() == null || !project.getEndDate().isBefore(LocalDateTime.now());
 	}
-	
+
 	/**
      * 根据过滤条件查询捐赠项目
      */
@@ -217,10 +217,10 @@ public class DonationProjectService {
         if (filter == null) {
             return findAll();
         }
-        
-        var organizers = filter.organizerFilter() != null ? 
+
+        var organizers = filter.organizerFilter() != null ?
             businessEntityService.findByFilter(filter.organizerFilter()) : null;
-            
+
         return donationProjectRepository.findAll((root, query, builder) ->
                 OptionalSpecificationBuilder.of(root, builder)
                         .in("organizer", organizers)
@@ -239,5 +239,17 @@ public class DonationProjectService {
                         .equal("targetReached", filter.targetReached())
                         .build()
         );
+    }
+
+    public DonationProject resumeProject(UUID id) {
+        DonationProject project = donationProjectRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("捐赠项目不存在"));
+
+        if (project.getStatus() != DonationProject.ProjectStatus.SUSPENDED) {
+            throw new RuntimeException("只能恢复已暂停的项目");
+        }
+
+        project.setStatus(DonationProject.ProjectStatus.ACTIVE);
+        return donationProjectRepository.save(project);
     }
 }

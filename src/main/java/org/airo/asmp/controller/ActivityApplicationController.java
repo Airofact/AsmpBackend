@@ -104,13 +104,30 @@ public class ActivityApplicationController {
         ActivityAlumniId id = new ActivityAlumniId();
         id.setActivityId(actId);
         id.setAlumniId(alumniId);
-        
+
         if (!activityApplicationRepository.existsById(id)) {
             return ResponseEntity.badRequest().body("id为 %s 的申请不存在！".formatted(id));
         }
 
         activityApplicationRepository.deleteById(id);
         return ResponseEntity.ok("申请删除成功！");
+    }
+
+    @PostMapping("/{alumniId}/sign-in")
+    public ResponseEntity<String> signIn(@PathVariable UUID actId, @PathVariable UUID alumniId) {
+        ActivityAlumniId id = new ActivityAlumniId();
+        id.setActivityId(actId);
+        id.setAlumniId(alumniId);
+
+        var application = activityApplicationRepository.findById(id);
+        if (application.isEmpty()) {
+            return ResponseEntity.badRequest().body("id为 %s 的申请不存在！".formatted(id));
+        }
+
+        ActivityApplication existingApplication = application.get();
+        existingApplication.setSignedIn(true);
+        activityApplicationRepository.save(existingApplication);
+        return ResponseEntity.ok("签到成功！");
     }
 
     // 申请分组查询

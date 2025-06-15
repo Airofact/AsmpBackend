@@ -16,5 +16,5 @@ public record DonationCreateDto(
         @NotNull Donation.PaymentMethod paymentMethod,
         String remark,
         Boolean anonymous,
-        String transactionId
+        @NotNull String transactionId
 ) {}

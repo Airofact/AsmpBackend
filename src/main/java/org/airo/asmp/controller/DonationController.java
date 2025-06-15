@@ -20,7 +20,7 @@ import java.util.UUID;
 @RequestMapping("/api/donation-project/{donProjId}/donation")
 @RequiredArgsConstructor
 public class DonationController {
-    
+
     private final DonationService donationService;    /**
      * 创建捐赠
      */
@@ -40,7 +40,7 @@ public class DonationController {
      */
     @PutMapping("/{donId}")
     public ResponseEntity<Donation> updateDonation(@PathVariable UUID donProjId,
-                                                  @PathVariable UUID donId, 
+                                                  @PathVariable UUID donId,
                                                   @Valid @RequestBody DonationUpdateDto updateDto) {
             // 验证捐赠属于指定的项目
             Donation existingDonation = donationService.findById(donId)
@@ -48,7 +48,7 @@ public class DonationController {
             if (existingDonation == null || !existingDonation.getProject().getId().equals(donProjId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
-            
+
             Donation donation = donationService.updateDonation(donId, updateDto);
             return ResponseEntity.ok(donation);
 
@@ -63,12 +63,12 @@ public class DonationController {
             if (existingDonation == null || !existingDonation.getProject().getId().equals(donProjId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
-            
+
             donationService.deleteDonation(donId);
             return ResponseEntity.noContent().build();
 
     }
-    
+
     /**
      * 根据ID查询捐赠
      */
@@ -85,17 +85,22 @@ public class DonationController {
     public ResponseEntity<List<Donation>> getProjectDonations(@PathVariable UUID donProjId) {
         List<Donation> donations = donationService.findByProject(donProjId);
         return ResponseEntity.ok(donations);
-    }      /**
+    }
+
+    /**
      * 根据条件查询捐赠
-     */    @PostMapping("/filter")
-    public ResponseEntity<List<Donation>> searchDonations(@PathVariable UUID donProjId, 
+     */
+    @PostMapping("/filter")
+    public ResponseEntity<List<Donation>> searchDonations(@PathVariable UUID donProjId,
                                                          @RequestBody DonationFilterDto filter) {
         List<Donation> donations = donationService.findByFilter(filter)
                 .stream()
                 .filter(donation -> donation.getProject().getId().equals(donProjId))
                 .toList();
         return ResponseEntity.ok(donations);
-    }/**
+    }
+
+    /**
      * 根据捐赠者查询
      */
     @GetMapping("/donor/{donorId}")
@@ -105,7 +110,7 @@ public class DonationController {
                 .toList();
         return ResponseEntity.ok(donations);
     }
-      
+
     /**
      * 计算项目总捐赠金额
      */
@@ -114,7 +119,8 @@ public class DonationController {
         BigDecimal totalAmount = donationService.calculateProjectTotalAmount(donProjId);
         return ResponseEntity.ok(totalAmount);
     }
-      /**
+
+    /**
      * 确认捐赠
      */    @PostMapping("/{donId}/confirm")
     public ResponseEntity<Donation> confirmDonation(@PathVariable UUID donProjId, @PathVariable UUID donId) {
@@ -124,15 +130,16 @@ public class DonationController {
             if (existingDonation == null || !existingDonation.getProject().getId().equals(donProjId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
-            
+
             Donation donation = donationService.confirmDonation(donId);
             return ResponseEntity.ok(donation);
 
     }
-    
+
     /**
      * 完成捐赠
-     */    @PostMapping("/{donId}/complete")
+     */
+    @PostMapping("/{donId}/complete")
     public ResponseEntity<Donation> completeDonation(@PathVariable UUID donProjId, @PathVariable UUID donId) {
             // 验证捐赠属于指定的项目
             Donation existingDonation = donationService.findById(donId)
@@ -140,7 +147,7 @@ public class DonationController {
             if (existingDonation == null || !existingDonation.getProject().getId().equals(donProjId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
-            
+
             Donation donation = donationService.completeDonation(donId);
             return ResponseEntity.ok(donation);
 
@@ -149,7 +156,7 @@ public class DonationController {
      */
     @GetMapping("/status/{status}")
     public ResponseEntity<List<Donation>> getDonationsByStatus(@PathVariable UUID donProjId, @PathVariable Donation.DonationStatus status) {        DonationFilterDto filter = new DonationFilterDto(
-                null, null, null, null, null, 
+                null, null, null, null, null,
                 null, null, status, null, null, null, null);
         List<Donation> donations = donationService.findByFilter(filter)
                 .stream()
@@ -162,7 +169,7 @@ public class DonationController {
      */
     @GetMapping("/payment/{paymentMethod}")
     public ResponseEntity<List<Donation>> getDonationsByPaymentMethod(@PathVariable UUID donProjId, @PathVariable Donation.PaymentMethod paymentMethod) {        DonationFilterDto filter = new DonationFilterDto(
-                null, null, null, null, paymentMethod, 
+                null, null, null, null, paymentMethod,
                 null, null, null, null, null, null, null);
         List<Donation> donations = donationService.findByFilter(filter)
                 .stream()
